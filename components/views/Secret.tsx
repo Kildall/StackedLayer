@@ -1,3 +1,5 @@
+'use client';
+
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { FC, useEffect, useState } from "react";
