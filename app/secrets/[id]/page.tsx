@@ -1,4 +1,3 @@
-'use client'
 import { Secret } from "@/components/views/Secret";
 import { Metadata } from "next";
 

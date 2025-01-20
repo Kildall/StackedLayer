@@ -1,5 +1,3 @@
-'use client'
-
 import { Files } from "@/components/views/Files";
 import { Metadata } from "next";
 
