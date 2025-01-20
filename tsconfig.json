@@ -10,6 +10,7 @@
     "paths": {
       "@/*": ["./*"]
     },
+    "typeRoots": ["./node_modules/@types", "./types"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,

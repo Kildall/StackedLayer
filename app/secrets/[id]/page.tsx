@@ -1,6 +1,4 @@
 'use client'
-
-import { Card } from "@/components/ui/card";
 import { Secret } from "@/components/views/Secret";
 
 
