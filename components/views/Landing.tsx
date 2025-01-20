@@ -19,6 +19,7 @@ interface LandingProps {
 
 export const Landing: FC<LandingProps> = ({ defaultMode = "select", maxFileSizeMB, maxSecretLength }) => {
   const [mode, setMode] = useState<"select" | "file" | "secret">(defaultMode);
+  const authed = false;
 
   return (
     <>
@@ -49,7 +50,25 @@ export const Landing: FC<LandingProps> = ({ defaultMode = "select", maxFileSizeM
           </p>
         </div>
 
-        <AnimatePresence mode="wait">
+        {/* Invite Only Warning */}
+        <div className="relative w-full max-w-md mx-auto bg-white z-10 mb-8">
+          <Card className="p-6 bg-white/95 backdrop-blur border-2 border-primary">
+            <div className="text-center">
+              <Lock className="h-12 w-12 mx-auto text-primary mb-4" />
+              <h2 className="text-2xl font-bold mb-4">Invite Only Access</h2>
+              <p className="text-muted-foreground mb-6">
+                This service is currently invite-only. If you have an invite code, please sign up to get started.
+              </p>
+              <Button className="w-full" size="lg">
+                Sign Up with Invite
+              </Button>
+            </div>
+          </Card>
+        </div>
+
+        {/* Mode Selector */}
+        {authed && (
+          <AnimatePresence mode="wait">
           {mode === "select" && (
             <motion.div
               key="select"
@@ -105,9 +124,10 @@ export const Landing: FC<LandingProps> = ({ defaultMode = "select", maxFileSizeM
               className="w-full max-w-md mx-auto"
             >
               <SecretInput onBack={() => setMode("select")} maxSecretLength={maxSecretLength} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Features Section */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
