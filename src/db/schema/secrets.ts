@@ -5,7 +5,7 @@ import { relations } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import { accessLogs } from './logs';
 
-export const secrets = pgTable('Secret', {
+export const secrets = pgTable('secret', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   encryptedData: text('encryptedData').notNull(),
   isViewed: boolean('isViewed').default(false),
@@ -13,7 +13,7 @@ export const secrets = pgTable('Secret', {
   expiresAt: timestamp('expiresAt').notNull(),
   userId: text('userId').references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt').notNull(),
+  updatedAt: timestamp('updatedAt'),
 });
 
 export const secretsRelations = relations(secrets, ({ one, many }) => ({

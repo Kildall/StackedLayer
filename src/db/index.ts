@@ -1,8 +1,8 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import {DATABASE_URL} from 'astro:env/server';
+import { AUTH_DRIZZLE_URL} from 'astro:env/server';
 
-const connectionString = DATABASE_URL;
+const connectionString = AUTH_DRIZZLE_URL;
 const client = postgres(connectionString, {
   prepare: false
 });

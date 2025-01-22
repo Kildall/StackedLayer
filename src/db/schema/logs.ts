@@ -5,7 +5,7 @@ import { files } from './files';
 import { secrets } from './secrets';
 import { relations } from 'drizzle-orm';
 
-export const accessLogs = pgTable('AccessLog', {
+export const accessLogs = pgTable('accessLog', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   type: text('type', { enum: ['UPLOAD', 'VIEW'] }).notNull(),
   ip: text('ip').notNull(),
@@ -32,12 +32,12 @@ export const accessLogsRelations = relations(accessLogs, ({ one }) => ({
   }),
 }));
 
-export const invitations = pgTable('Invitation', {
+export const invitations = pgTable('invitation', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   email: text('email').notNull(),
   token: text('token').unique().notNull(),
   used: boolean('used').default(false),
   expiresAt: timestamp('expiresAt').notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt').notNull(),
+  updatedAt: timestamp('updatedAt'),
 });

@@ -1,15 +1,15 @@
-import { pgTable, text, timestamp, boolean, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
 import { relations } from 'drizzle-orm';
 import { accounts, authenticators, sessions } from './auth';
 import { files } from './files';
 import { secrets } from './secrets';
 
-export const users = pgTable('User', {
+export const users = pgTable('user', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   name: text('name'),
   email: text('email').notNull().unique(),
-  emailVerified: timestamp('emailVerified'),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text('image'),
   password: text('password'),
   salt: text('salt'),
@@ -17,7 +17,7 @@ export const users = pgTable('User', {
   invitedBy: text('invitedBy'),
   invitedAt: timestamp('invitedAt'),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt').notNull()
+  updatedAt: timestamp('updatedAt')
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

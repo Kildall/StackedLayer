@@ -5,7 +5,7 @@ import { relations } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import { accessLogs } from './logs';
 
-export const files = pgTable('File', {
+export const files = pgTable('file', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   filename: text('filename').notNull(),
   mimeType: text('mimeType').notNull(),
@@ -16,7 +16,7 @@ export const files = pgTable('File', {
   expiresAt: timestamp('expiresAt').notNull(),
   userId: text('userId').references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt').notNull(),
+  updatedAt: timestamp('updatedAt'),
 });
 
 export const filesRelations = relations(files, ({ one, many }) => ({
