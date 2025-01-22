@@ -22,11 +22,6 @@ export default defineConfig({
   })],
 
   adapter: cloudflare(),
-  vite: {
-    ssr: {
-      external: ['node:path']
-    },
-  },
 
   env: {
     schema: {
