@@ -7,7 +7,7 @@ import tailwind from '@astrojs/tailwind';
 
 import sitemap from '@astrojs/sitemap';
 
-import auth from 'auth-astro';
+import auth from 'auth-astro'
 
 import cloudflare from '@astrojs/cloudflare';
 
@@ -20,7 +20,14 @@ export default defineConfig({
   }), sitemap(), auth({
     injectEndpoints: true,
   })],
-
+  vite: {
+    resolve: {
+      alias: {
+        '@': '/src'
+      }
+    }
+  },
+  srcDir: './src',
   adapter: cloudflare(),
 
   env: {
