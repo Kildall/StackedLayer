@@ -1,13 +1,13 @@
 import { defineConfig } from 'auth-astro';
-import { prisma } from '@/prisma';
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import Google from '@auth/core/providers/google';
 import Resend from '@auth/core/providers/resend';
+import { db } from '@/db';
 
 const AUTH_ENABLED = import.meta.env.AUTH_ENABLED;
 
 export default defineConfig({
-  adapter: AUTH_ENABLED ? PrismaAdapter(prisma) : undefined,
+  adapter: AUTH_ENABLED ? DrizzleAdapter(db) : undefined,
   providers: AUTH_ENABLED ? [
     Google({
       clientId: import.meta.env.AUTH_GOOGLE_ID,

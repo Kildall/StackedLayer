@@ -26,7 +26,7 @@ export default defineConfig({
 
   env: {
     schema: {
-      DATABASE_URL: envField.string({
+      AUTH_DRIZZLE_URL: envField.string({
         context: 'server',
         access: 'secret',
         default: 'postgresql://postgres:postgres@localhost:5432/',
