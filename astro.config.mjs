@@ -21,6 +21,7 @@ export default defineConfig({
     injectEndpoints: true,
   })],
 
+  adapter: cloudflare(),
   vite: {
     ssr: {
       external: ['node:path']
