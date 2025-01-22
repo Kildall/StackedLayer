@@ -13,6 +13,7 @@
     "db:reset": "pnpm prisma migrate reset"
   },
   "dependencies": {
+    "auth-astro": "file:./auth-astro",
     "@astrojs/cloudflare": "^12.2.0",
     "@astrojs/react": "^4.1.6",
     "@astrojs/sitemap": "^3.2.1",
