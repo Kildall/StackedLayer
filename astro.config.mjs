@@ -1,14 +1,9 @@
 // @ts-check
 import { defineConfig, envField } from 'astro/config';
-
 import react from '@astrojs/react';
-
 import tailwind from '@astrojs/tailwind';
-
 import sitemap from '@astrojs/sitemap';
-
 import auth from 'auth-astro'
-
 import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
@@ -21,9 +16,9 @@ export default defineConfig({
   })],
   vite: {
     resolve: {
-      alias: {
-        '@': '/src'
-      }
+      alias: import.meta.env.PROD ? {
+        "react-dom/server": "react-dom/server.edge",
+      } : undefined,
     }
   },
   srcDir: './src',
