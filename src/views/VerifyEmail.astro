@@ -1,0 +1,81 @@
+---
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Mail, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Waves } from "@/components/ui/waves-background";
+import { BackButtonIsland } from "@/islands/navigation/BackButton";
+
+interface Props {
+  provider: string;
+}
+
+const { provider } = Astro.props;
+---
+
+<div>
+  <div class="absolute inset-0">
+    <Waves
+      client:visible
+      lineColor="rgba(0, 0, 0, 0.3)"
+      backgroundColor="transparent"
+      waveSpeedX={0.02}
+      waveSpeedY={0.01}
+      waveAmpX={40}
+      waveAmpY={20}
+      friction={0.9}
+      tension={0.01}
+      maxCursorMove={120}
+      xGap={12}
+      yGap={36}
+    />
+  </div>
+  <div class="relative flex w-full items-center justify-center p-6 md:p-10">
+    <div class="w-full max-w-md bg-white">
+      <Card className="border-2">
+        <CardHeader className="space-y-1">
+          <div class="flex justify-center mb-4">
+            <div class="bg-primary/10 p-3 rounded-full">
+              <Mail className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-center"
+            >Check Your Email</CardTitle
+          >
+          <CardDescription className="text-center">
+            We've sent you a verification link to your email address
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>
+              Click the link in your email to verify your account. If you don't
+              see it, check your spam folder.
+            </AlertDescription>
+          </Alert>
+
+          <div class="text-center text-sm text-muted-foreground">
+            <p>Verification email sent via {provider}</p>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-2">
+          <BackButtonIsland client:visible href="/">
+            Back to Homepage
+          </BackButtonIsland>
+          <p class="text-xs text-center text-muted-foreground">
+            Didn't receive the email? Check your spam folder or try again in a
+            few minutes.
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
+  </div>
+</div>

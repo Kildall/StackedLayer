@@ -1,0 +1,99 @@
+---
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Shield, LogIn, UserPlus } from "lucide-react";
+import { MobileNavigationIsland } from "@/islands/layout/MobileNavigation";
+import { getSession } from "auth-astro/server";
+import { UserProfileIsland } from "@/islands/layout/UserProfile";
+import { AUTH_ENABLED } from "astro:env/server";
+import Github from "simple-icons-astro/Github";
+
+const currentPath = Astro.url.pathname;
+
+const shouldShow = {
+  login: AUTH_ENABLED && currentPath !== "/login",
+  signup: AUTH_ENABLED && currentPath !== "/signup",
+  github: !AUTH_ENABLED,
+  user: false,
+};
+
+const session = AUTH_ENABLED ? await getSession(Astro.request) : null;
+if (session?.user) {
+  shouldShow.login = false;
+  shouldShow.signup = false;
+  shouldShow.user = true;
+}
+---
+
+<div class="container mx-auto max-w-7xl z-10">
+  <Card
+    className="bg-background py-3 px-4 border-0 flex items-center justify-between gap-6 rounded-2xl mt-5"
+  >
+    <ul class="hidden md:flex items-center gap-10 text-card-foreground">
+      <li class="text-primary font-medium">
+        <a href="/" class="flex items-center gap-2">
+          <Shield className="w-6 h-6" client:load />
+          <h1 class="text-xl font-bold">StackedLayer</h1>
+        </a>
+      </li>
+      <li>
+        <a href="/#features">Features</a>
+      </li>
+      <li>
+        <a href="/#faqs">FAQs</a>
+      </li>
+    </ul>
+
+    <div class="flex items-center">
+      {
+        shouldShow.login && (
+          <a href="/login">
+            <Button
+              variant="outline"
+              className="hidden px-2 md:flex items-center gap-2"
+            >
+              <LogIn className="w-4 h-4" client:load />
+              Log In
+            </Button>
+          </a>
+        )
+      }
+
+      {
+        shouldShow.signup && (
+          <a href="/login">
+            <Button
+              variant="default"
+              className="hidden px-2 md:flex items-center gap-2 ml-2 mr-2"
+            >
+              <UserPlus className="w-4 h-4" client:load />
+              Sign Up
+            </Button>
+          </a>
+        )
+      }
+
+      {
+        shouldShow.user && (
+          <UserProfileIsland client:visible session={JSON.stringify(session)} />
+        )
+      }
+
+      {
+        shouldShow.github && (
+          <a href="https://github.com/kildall">
+            <Button variant="outline">
+              <Github className="w-4 h-4" client:load />
+              GitHub
+            </Button>
+          </a>
+        )
+      }
+
+      <MobileNavigationIsland
+        client:load
+        currentPath={currentPath.toString()}
+      />
+    </div>
+  </Card>
+</div>

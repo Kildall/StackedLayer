@@ -1,0 +1,72 @@
+---
+import { Waves } from "@/components/ui/waves-background";
+import { Shield, Lock } from "lucide-react";
+import InviteOnly from "@/components/InviteOnly.astro";
+import LandingSwitcher from "@/components/LandingSwitcher.astro";
+
+const { inviteOnly } = Astro.props;
+---
+
+<div>
+  <!-- Background Waves -->
+  <div class="absolute inset-0 h-screen">
+    <Waves
+      client:visible
+      lineColor="rgba(0, 0, 0, 0.3)"
+      backgroundColor="transparent"
+      waveSpeedX={0.02}
+      waveSpeedY={0.01}
+      waveAmpX={40}
+      waveAmpY={20}
+      friction={0.9}
+      tension={0.01}
+      maxCursorMove={120}
+      xGap={12}
+      yGap={36}
+    />
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Hero Section -->
+    <div class="text-center my-12">
+      <h1 class="text-4xl font-bold tracking-tight text-primary mb-4">
+        Share Secrets Securely
+      </h1>
+      <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+        End-to-end encrypted file and secret sharing. Your data is automatically
+        deleted after being viewed, ensuring your sensitive information stays
+        private and secure.
+      </p>
+    </div>
+
+    {inviteOnly && <InviteOnly client:load />}
+
+    <!-- Interactive Components -->
+    <LandingSwitcher />
+
+    <!-- Features Section -->
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+      <div class="p-6">
+        <Shield className="h-12 w-12 mx-auto text-primary mb-4" />
+        <h3 class="text-lg font-semibold mb-2">End-to-End Encryption</h3>
+        <p class="text-muted-foreground">
+          Your data is encrypted before it leaves your browser
+        </p>
+      </div>
+      <div class="p-6">
+        <Lock className="h-12 w-12 mx-auto text-primary mb-4" />
+        <h3 class="text-lg font-semibold mb-2">One-Time Access</h3>
+        <p class="text-muted-foreground">
+          Files and secrets are deleted immediately after being viewed
+        </p>
+      </div>
+      <div class="p-6">
+        <Shield className="h-12 w-12 mx-auto text-primary mb-4" />
+        <h3 class="text-lg font-semibold mb-2">Open Source</h3>
+        <p class="text-muted-foreground">
+          Fully transparent, auditable code you can trust
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

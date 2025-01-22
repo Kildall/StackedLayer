@@ -1,0 +1,70 @@
+---
+import { SEO } from "astro-seo";
+import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/layout/Footer.astro";
+import Navbar from "@/components/layout/Navbar.astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <SEO
+      titleDefault="StackedLayer"
+      titleTemplate="%s | StackedLayer"
+      description="Security focused One-Time files and secrets sharing."
+      openGraph={{
+        basic: {
+          title: "StackedLayer",
+          type: "website",
+          image: "/favicon.svg",
+        },
+      }}
+      twitter={{
+        creator: "@StackedLayer",
+      }}
+      charset="utf-8"
+      extend={{
+        // extending the default link tags
+        link: [{ rel: "icon", href: "/favicon.ico" }],
+        // extending the default meta tags
+        meta: [
+          {
+            name: "twitter:image",
+            content: "/favicon.svg",
+          },
+          { name: "twitter:title", content: "StackedLayer" },
+          {
+            name: "twitter:description",
+            content: "Security focused One-Time files and secrets sharing.",
+          },
+        ],
+      }}
+    />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body>
+    <div
+      class="min-h-screen flex flex-col bg-gradient-to-br from-background to-muted"
+    >
+      <Navbar />
+      <main class="flex-grow w-full mx-auto overflow-hidden">
+        <slot />
+      </main>
+      <Toaster client:only="react" />
+      <Footer />
+    </div>
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+</style>

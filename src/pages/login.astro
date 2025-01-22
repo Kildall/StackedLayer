@@ -1,0 +1,23 @@
+---
+import LoginView from "@/views/Login.astro";
+import Layout from "@/layouts/Layout.astro";
+import { getSession } from "auth-astro/server";
+import { AUTH_ENABLED } from "astro:env/server";
+
+import "@/styles/globals.css";
+
+export const prerender = false;
+
+if (!AUTH_ENABLED) {
+  return Astro.redirect("/");
+}
+
+const session = await getSession(Astro.request);
+if (session && session.user) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout>
+  <LoginView />
+</Layout>

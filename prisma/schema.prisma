@@ -1,68 +1,177 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-model Account {
-  id                 Int       @id @default(autoincrement())
-  compoundId         String    @unique @map(name: "compound_id")
-  userId             Int       @map(name: "user_id")
-  providerType       String    @map(name: "provider_type")
-  providerId         String    @map(name: "provider_id")
-  providerAccountId  String    @map(name: "provider_account_id")
-  refreshToken       String?   @map(name: "refresh_token")
-  accessToken        String?   @map(name: "access_token")
-  accessTokenExpires DateTime? @map(name: "access_token_expires")
-  createdAt          DateTime  @default(now()) @map(name: "created_at")
-  updatedAt          DateTime  @default(now()) @map(name: "updated_at")
-
-  @@index([providerAccountId], name: "providerAccountId")
-  @@index([providerId], name: "providerId")
-  @@index([userId], name: "userId")
-  @@map(name: "accounts")
+ 
+generator client {
+  provider = "prisma-client-js"
 }
-
-model Session {
-  id           Int      @id @default(autoincrement())
-  userId       Int      @map(name: "user_id")
-  expires      DateTime
-  sessionToken String   @unique @map(name: "session_token")
-  accessToken  String   @unique @map(name: "access_token")
-  createdAt    DateTime @default(now()) @map(name: "created_at")
-  updatedAt    DateTime @default(now()) @map(name: "updated_at")
-
-  @@map(name: "sessions")
-}
-
+ 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            String          @id @default(cuid())
   name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map(name: "email_verified")
+  email         String          @unique
+  emailVerified DateTime?
   image         String?
-  createdAt     DateTime  @default(now()) @map(name: "created_at")
-  updatedAt     DateTime  @default(now()) @map(name: "updated_at")
-
-  @@map(name: "users")
+  password      String?
+  salt          String?
+  accounts      Account[]
+  sessions      Session[]
+  Authenticator Authenticator[]
+  
+  files           File[]          // Files uploaded by the user
+  secrets         Secret[]        // Secrets created by the user
+  isAdmin         Boolean         @default(false) // Temp property for admin users
+  invitedBy       String?         // Token of the invitation used
+  invitedAt       DateTime?       // When the user registered via invite
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([userId, credentialID])
 }
 
-model VerificationRequest {
-  id         Int      @id @default(autoincrement())
-  identifier String
-  token      String   @unique
-  expires    DateTime
-  createdAt  DateTime @default(now()) @map(name: "created_at")
-  updatedAt  DateTime @default(now()) @map(name: "updated_at")
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  token       String    @unique
+  used        Boolean   @default(false)
+  expiresAt   DateTime
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@map(name: "verification_requests")
+  @@index([email])
+  @@index([token])
+}
+
+model AccessLog {
+  id          String    @id @default(cuid())
+  type        LogType 
+  
+  // Client information
+  ip          String
+  userAgent   String
+  country     String?
+  city        String?
+  region      String?
+  timezone    String?
+  language    String?
+  
+  // User info if logged in
+  userId      String?
+  
+  // Relations to content
+  fileId      String?
+  file        File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  secretId    String?
+  secret      Secret?   @relation(fields: [secretId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+
+  @@index([ip])
+  @@index([fileId])
+  @@index([secretId])
+  @@index([userId])
+  @@index([type])
+}
+
+enum LogType {
+  UPLOAD
+  VIEW
+}
+
+model File {
+  id              String    @id @default(cuid())
+  filename        String
+  mimeType        String
+  size            Int
+  storageKey      String    @unique // Key for your storage service (S3, etc.)
+  isViewed        Boolean   @default(false)
+  accessToken     String    @unique // Token for accessing the file
+  expiresAt       DateTime
+  
+  // Relations
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Access logs
+  logs            AccessLog[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([accessToken])
+}
+
+model Secret {
+  id              String    @id @default(cuid())
+  encryptedData   String    // Encrypted secret content
+  isViewed        Boolean   @default(false)
+  accessToken     String    @unique // Token for accessing the secret
+  expiresAt       DateTime
+  
+  // Relations
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Access logs
+  logs            AccessLog[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([accessToken])
 }

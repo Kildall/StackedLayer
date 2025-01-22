@@ -1,0 +1,30 @@
+---
+import VerifyEmailView from "@/views/VerifyEmail.astro";
+import Layout from "@/layouts/Layout.astro";
+import { z } from "zod";
+import "@/styles/globals.css";
+import { AUTH_ENABLED } from "astro:env/server";
+
+export const prerender = false;
+
+if (!AUTH_ENABLED) {
+  return Astro.redirect("/");
+}
+
+const provider = Astro.url.searchParams.get("provider");
+
+const queryParamsSchema = z.object({
+  provider: z.string().min(1).max(255),
+});
+
+let data: z.infer<typeof queryParamsSchema> | null = null;
+try {
+  data = queryParamsSchema.parse({ provider });
+} catch (error) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout>
+  {data && <VerifyEmailView provider={data.provider} />}
+</Layout>
