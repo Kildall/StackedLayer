@@ -3,8 +3,7 @@ import { Waves } from "@/components/ui/waves-background";
 import { Shield, Lock } from "lucide-react";
 import InviteOnly from "@/components/InviteOnly.astro";
 import LandingSwitcher from "@/components/LandingSwitcher.astro";
-
-const { inviteOnly } = Astro.props;
+import { INVITE_ONLY } from "astro:env/server";
 ---
 
 <div>
@@ -39,10 +38,7 @@ const { inviteOnly } = Astro.props;
       </p>
     </div>
 
-    {inviteOnly && <InviteOnly />}
-
-    <!-- Interactive Components -->
-    <LandingSwitcher />
+    {INVITE_ONLY ? <InviteOnly /> : <LandingSwitcher />}
 
     <!-- Features Section -->
     <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">

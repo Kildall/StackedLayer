@@ -1,0 +1,29 @@
+---
+import AuthErrorView from "@/views/AuthError.astro";
+import Layout from "@/layouts/Layout.astro";
+import { AUTH_ENABLED } from "astro:env/server";
+import { z } from "zod";
+
+import "@/styles/globals.css";
+
+if (!AUTH_ENABLED) {
+  return Astro.redirect("/");
+}
+
+const error = Astro.url.searchParams.get("error");
+
+const queryParamsSchema = z.object({
+  error: z.string().min(1).max(255),
+});
+
+let data: z.infer<typeof queryParamsSchema> | null = null;
+try {
+  data = queryParamsSchema.parse({ error });
+} catch (error) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout>
+  <AuthErrorView error={data?.error} />
+</Layout>

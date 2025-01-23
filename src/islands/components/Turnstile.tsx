@@ -9,6 +9,34 @@ export interface TurnstileWidgetProps {
 
 export function TurnstileWidgetIsland({ setValidVerification, className = '' }: TurnstileWidgetProps) {
   const [turnstileWidget, setTurnstileWidget] = useState<number>();
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  useEffect(() => {
+    const checkTurnstile = () => {
+      if (window.turnstile) {
+        setScriptLoaded(true);
+        return;
+      }
+      setTimeout(checkTurnstile, 100);
+    };
+    checkTurnstile();
+  }, []);
+
+  useEffect(() => {
+    if (scriptLoaded && !turnstileWidget && window.turnstile) {
+      const widgetId = window.turnstile.render('.cf-turnstile', {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: handleTurnstileVerify,
+      });
+      setTurnstileWidget(widgetId);
+    }
+    
+    return () => {
+      if (turnstileWidget && window.turnstile) {
+        window.turnstile.remove(turnstileWidget);
+      }
+    };
+  }, [scriptLoaded]);
 
   const handleTurnstileVerify = async (token: string) => {
     try {
@@ -31,22 +59,6 @@ export function TurnstileWidgetIsland({ setValidVerification, className = '' }: 
     }
   };
   
-  useEffect(() => {
-    if (window.turnstile && !turnstileWidget) {
-      const widgetId = window.turnstile.render('.cf-turnstile', {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: handleTurnstileVerify,
-      });
-      setTurnstileWidget(widgetId);
-    }
-    
-    return () => {
-      if (turnstileWidget && window.turnstile) {
-        window.turnstile.remove(turnstileWidget);
-      }
-    };
-  }, []);
-
   return (
     <div 
       className={`cf-turnstile flex justify-center ${className}`}

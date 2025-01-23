@@ -4,26 +4,21 @@ import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 import auth from 'auth-astro'
-import cloudflare from '@astrojs/cloudflare';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
+  output: 'server',
   site: 'https://stackedlayer.com',
   integrations: [react(), tailwind({
     applyBaseStyles: false,
   }), sitemap(), auth({
     injectEndpoints: true,
   })],
-  vite: {
-    resolve: {
-      alias: import.meta.env.PROD ? {
-        "react-dom/server": "react-dom/server.edge",
-      } : undefined,
-    }
-  },
   srcDir: './src',
-  adapter: cloudflare(),
-
+  adapter: node({
+    mode: 'standalone',
+  }),
   env: {
     schema: {
       AUTH_DRIZZLE_URL: envField.string({
@@ -83,7 +78,7 @@ export default defineConfig({
       AUTH_ENABLED: envField.boolean({
         context: 'server',
         access: 'secret',
-        default: false,
+        default: true,
       }),
       LOGIN_REQUIRED: envField.boolean({
         context: 'server',

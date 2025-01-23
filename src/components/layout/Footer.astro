@@ -1,8 +1,7 @@
 ---
 // src/components/Footer.astro
 import { Button } from "@/components/ui/button";
-import { Shield } from "lucide-react";
-import X from "simple-icons-astro/X";
+import { Shield, HeartIcon } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
 
@@ -13,9 +12,7 @@ const pages = [
   { href: "/signup", label: "Sign Up" },
 ];
 
-const socials = [
-  { href: "https://github.com/kildall", label: "Github" }
-];
+const socials = [{ href: "https://github.com/kildall", label: "Github" }];
 
 const legal = [
   { href: "/privacy", label: "Privacy Policy" },
@@ -24,48 +21,41 @@ const legal = [
 ---
 
 <footer class="py-12 px-4 md:px-6 bg-background z-10">
-  <div class="container mx-auto max-w-7xl ">
+  <div class="container mx-auto max-w-7xl">
     <div class="flex flex-col md:flex-row justify-around">
       <div class="mb-8 md:mb-0">
         <a href="/" class="flex items-center gap-2">
           <Shield className="icon-class w-8" />
           <h2 class="text-lg font-bold">StackedLayer</h2>
         </a>
-
-        <h1 class="dark:text-gray-300 mt-4">
-          Built by{" "}
-          <span class="dark:text-[#039ee4]">
-            <a href="https://github.com/kildall">Kildall</a>
-          </span>
-        </h1>
-        <div class="mt-2">
-          <a href="">
-            <Button variant="secondary">
-              Share Your Thoughts On
-              <X className="icon-class ml-1 w-3.5" />
-            </Button>
-          </a>
+        <div class="mt-4">
+          <Button variant="secondary">
+            Built with <HeartIcon className="icon-class w-3.5" />
+            by Kildall
+          </Button>
         </div>
         <p class="text-sm dark:text-gray-400 mt-5">
           © {currentYear} StackedLayer. All rights reserved.
         </p>
       </div>
-      
+
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
         <!-- Pages -->
         <div>
           <h3 class="font-semibold mb-4">Pages</h3>
           <ul class="space-y-2">
-            {pages.map(({ href, label }) => (
-              <li>
-                <a 
-                  href={href}
-                  class="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
+            {
+              pages.map(({ href, label }) => (
+                <li>
+                  <a
+                    href={href}
+                    class="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
           </ul>
         </div>
 
@@ -73,16 +63,18 @@ const legal = [
         <div>
           <h3 class="font-semibold mb-4">Socials</h3>
           <ul class="space-y-2">
-            {socials.map(({ href, label }) => (
-              <li>
-                <a 
-                  href={href}
-                  class="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
+            {
+              socials.map(({ href, label }) => (
+                <li>
+                  <a
+                    href={href}
+                    class="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
           </ul>
         </div>
 
@@ -90,16 +82,18 @@ const legal = [
         <div>
           <h3 class="font-semibold mb-4">Legal</h3>
           <ul class="space-y-2">
-            {legal.map(({ href, label }) => (
-              <li>
-                <a 
-                  href={href}
-                  class="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
+            {
+              legal.map(({ href, label }) => (
+                <li>
+                  <a
+                    href={href}
+                    class="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
           </ul>
         </div>
       </div>
