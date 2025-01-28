@@ -1,13 +1,12 @@
 ---
 import { Waves } from "@/components/ui/waves-background";
 import TurnstileLoader from "@/islands/components/TurnstileLoader.astro";
-import { LoginFormIsland } from "@/islands/forms/LoginForm.tsx";
-import { INVITE_ONLY } from "astro:env/server";
+import { InviteOnlyFormIsland } from "@/islands/forms/InviteOnlyForm";
 ---
 
 <TurnstileLoader>
   <div>
-    <div class="absolute inset-0">
+    <div class="absolute inset-0 h-screen">
       <Waves
         client:visible
         lineColor="rgba(0, 0, 0, 0.3)"
@@ -24,8 +23,8 @@ import { INVITE_ONLY } from "astro:env/server";
       />
     </div>
     <div class="relative flex w-full items-center justify-center p-6 md:p-10">
-      <div class="w-full max-w-sm bg-white">
-        <LoginFormIsland client:load inviteOnly={INVITE_ONLY} />
+      <div class="w-full max-w-md space-y-8 px-4">
+        <InviteOnlyFormIsland client:load />
       </div>
     </div>
   </div>

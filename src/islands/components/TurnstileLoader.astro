@@ -1,0 +1,21 @@
+---
+
+---
+
+<html>
+  <head>
+    <script
+      is:inline
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback"
+      async
+      defer></script>
+    <script is:inline>
+      window.onloadTurnstileCallback = function () {
+        console.log("Turnstile script loaded");
+      };
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -4,10 +4,11 @@ import '@/types/turnstile'
 
 export interface TurnstileWidgetProps {
   setValidVerification: (valid: boolean) => void;
+  setExpired: (expired: boolean) => void;
   className?: string;
 }
 
-export function TurnstileWidgetIsland({ setValidVerification, className = '' }: TurnstileWidgetProps) {
+export function TurnstileWidgetIsland({ setValidVerification, setExpired, className = '' }: TurnstileWidgetProps) {
   const [turnstileWidget, setTurnstileWidget] = useState<number>();
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
@@ -27,6 +28,8 @@ export function TurnstileWidgetIsland({ setValidVerification, className = '' }: 
       const widgetId = window.turnstile.render('.cf-turnstile', {
         sitekey: TURNSTILE_SITE_KEY,
         callback: handleTurnstileVerify,
+        'refresh-expired': 'manual',
+        'expired-callback': () => setExpired(true),
       });
       setTurnstileWidget(widgetId);
     }
@@ -50,6 +53,7 @@ export function TurnstileWidgetIsland({ setValidVerification, className = '' }: 
 
       if (response.ok) {
         setValidVerification(true);
+        setExpired(false);
       } else {
         setValidVerification(false);
       }

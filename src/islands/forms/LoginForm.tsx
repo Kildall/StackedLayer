@@ -23,6 +23,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState } from 'react'
 import { TurnstileWidgetIsland } from '@/islands/components/Turnstile'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { InfoIcon } from "lucide-react"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -35,14 +37,17 @@ const formSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof formSchema>
 
-export type LoginFormProps = {}
+export type LoginFormProps = {
+  inviteOnly?: boolean
+}
 
 export function LoginFormIsland({
   className,
+  inviteOnly,
   ...props
 }: React.ComponentPropsWithoutRef<"div"> & LoginFormProps) {
-  const [isTurnstileVerified, setIsTurnstileVerified] = useState(false);
-  
+  const [_, setIsTurnstileVerified] = useState(false);
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,13 +87,41 @@ export function LoginFormIsland({
     form.setValue('validVerification', isValid);
   };
 
+  const handleTurnstileExpired = (expired: boolean) => {
+    if(expired) {
+      form.setError('validVerification', {
+        message: "Verification expired, please try again",
+      });
+      setIsTurnstileVerified(false);
+    } else {
+      form.clearErrors('validVerification');
+      setIsTurnstileVerified(true);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome to StackedLayer</CardTitle>
+          <CardTitle>
+            <h2 className="text-2xl font-bold mb-2">Welcome to StackedLayer</h2>
+          </CardTitle>
           <CardDescription>
-            Login with your GitHub or Google account
+            <div className="flex items-center justify-center gap-2">
+              Login with your GitHub or Google account
+              {inviteOnly && (
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="w-4 h-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    You will need an invite code to finish setting up your account
+                  </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -133,18 +166,19 @@ export function LoginFormIsland({
                   control={form.control}
                   name="validVerification"
                   render={({ field }) => (
-                    <>
-                      <TurnstileWidgetIsland 
+                    <div className="flex flex-col justify-center">
+                      <TurnstileWidgetIsland
                         setValidVerification={handleTurnstileVerify}
+                        setExpired={handleTurnstileExpired}
                         {...field}
                       />
                       <FormMessage className="text-red-400 text-xs font-normal" />
-                    </>
+                    </div>
                   )}
                 />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full"
                 >
                   Login with Email

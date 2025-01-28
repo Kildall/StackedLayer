@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, LogIn, UserPlus } from "lucide-react";
-import { MobileNavigationIsland } from "@/islands/layout/MobileNavigation";
+import { MobileNavbar } from "@/islands/layout/MobileNavbar";
 import { getSession } from "auth-astro/server";
 import { UserProfileIsland } from "@/islands/layout/UserProfile";
 import { AUTH_ENABLED } from "astro:env/server";
@@ -90,10 +90,7 @@ if (session?.user) {
         )
       }
 
-      <MobileNavigationIsland
-        client:load
-        currentPath={currentPath.toString()}
-      />
+      <MobileNavbar client:load currentPath={currentPath.toString()} />
     </div>
   </Card>
 </div>

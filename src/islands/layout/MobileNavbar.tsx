@@ -9,20 +9,17 @@ import {
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface MobileNavigationProps {
+interface MobileNavbarProps {
   currentPath: string;
 }
 
-export const MobileNavigationIsland: FC<MobileNavigationProps> = ({ currentPath }) => {
-  const [ignoreRender, setIgnoreRender] = useState<Array<{name: 'login' | 'signup', path: string}>>([]);
+export const MobileNavbar: FC<MobileNavbarProps> = ({ currentPath }) => {
+  const [ignoreRender, setIgnoreRender] = useState<Array<{ name: 'login' | 'signup', path: string }>>([]);
 
   useEffect(() => {
     switch (currentPath) {
       case "/login":
         setIgnoreRender([{ name: "login", path: "/login" }]);
-        break;
-      case "/signup":
-        setIgnoreRender([{ name: "signup", path: "/signup" }]);
         break;
       default:
         setIgnoreRender([]);
@@ -58,11 +55,9 @@ export const MobileNavigationIsland: FC<MobileNavigationProps> = ({ currentPath 
             )}
           </DropdownMenuItem>
           <DropdownMenuItem className="flex justify-center focus:bg-transparent">
-            {!ignoreRender.find(x => x.name === 'signup') && (
-              <a href="/signup" className="w-64">
-                <Button className="w-full text-sm">Sign Up</Button>
-              </a>
-            )}
+            <a href="/signup" className="w-64">
+              <Button className="w-full text-sm">Sign Up</Button>
+            </a>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

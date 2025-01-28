@@ -32,6 +32,8 @@ export const accessLogsRelations = relations(accessLogs, ({ one }) => ({
   }),
 }));
 
+export type Invitation = typeof invitations.$inferSelect;
+
 export const invitations = pgTable('invitation', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   email: text('email').notNull(),

@@ -2,7 +2,7 @@ import { useState, type FC } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Upload, Link as LinkIcon, Check } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "hooks/use-toast";
 import { motion } from "framer-motion";
 
 interface FileUploadIslandProps {

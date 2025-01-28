@@ -4,6 +4,9 @@ import { relations } from 'drizzle-orm';
 import { accounts, authenticators, sessions } from './auth';
 import { files } from './files';
 import { secrets } from './secrets';
+import { invitations } from './logs';
+
+export type User = typeof users.$inferSelect;
 
 export const users = pgTable('user', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
@@ -14,8 +17,7 @@ export const users = pgTable('user', {
   password: text('password'),
   salt: text('salt'),
   isAdmin: boolean('isAdmin').default(false),
-  invitedBy: text('invitedBy'),
-  invitedAt: timestamp('invitedAt'),
+  invitation: text('invitation').references(() => invitations.token),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt')
 });
