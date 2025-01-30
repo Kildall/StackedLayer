@@ -215,10 +215,12 @@ export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) =
 
                 <div className="mt-auto pt-4 border-t border-primary-foreground/10">
                   <div className="flex justify-between items-center">
-                    <Button variant="ghost" className="text-sm text-primary-foreground flex items-center">
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      <a href="/">Go Back</a>
-                    </Button>
+                    <a href="/">
+                      <Button variant="ghost" className="text-sm text-primary-foreground flex items-center">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Go Back
+                      </Button>
+                    </a>
                     <span className="text-sm text-muted-foreground">
                       This {secretData.type === 'file' ? 'file' : 'secret'} {oneTime ? 'has been deleted, it will not be available again' : `will be deleted on ${new Date(secretData.expiresAt).toLocaleDateString()} at ${new Date(secretData.expiresAt).toLocaleTimeString()}`}
                     </span>
