@@ -1,4 +1,4 @@
-import { INVITE_ONLY } from "astro:env/server";
+import { INVITE_ONLY, LOGIN_REQUIRED } from "astro:env/server";
 import { getUser, getUserWithInvite } from "@/db/queries/get-user";
 import { getSession } from "auth-astro/server";
 import type { User } from "@/db/schema";
@@ -53,7 +53,7 @@ interface SessionAPIContext extends APIContext {
 // Extended API context with session
 interface AuthAPIContext extends SessionAPIContext {
   auth: Session | null;
-  user: User;
+  user: User | null;
 }
 
 // Type for the wrapped API handler
@@ -68,6 +68,13 @@ type WrappedAPIRouteWithUser = (context: AuthAPIContext) => ReturnType<APIRoute>
 export function withSession(handler: WrappedAPIRoute): APIRoute {
   return async (context: APIContext) => {
     try {
+      if (!LOGIN_REQUIRED) {
+        const enhancedContext: SessionAPIContext = {
+          ...context,
+          auth: null,
+        };
+        return await handler(enhancedContext);
+      }
       // Get the session from the request
       const session = await getSession(context.request);
       
@@ -91,6 +98,15 @@ export function withSession(handler: WrappedAPIRoute): APIRoute {
  */
 export function withAuth(handler: WrappedAPIRouteWithUser): APIRoute {
   return withSession(async (context) => {
+    if (!LOGIN_REQUIRED) {
+      const enhancedContext: AuthAPIContext = {
+        ...context,
+        auth: null,
+        user: null,
+      };
+      return await handler(enhancedContext);
+    }
+
     const { auth } = context;
     if (!auth || !auth.user || !auth.user.email) {
       return new Response('Unauthorized', { status: 401 });

@@ -4,6 +4,15 @@ import { Shield, Lock } from "lucide-react";
 import InviteOnly from "@/components/InviteOnly.astro";
 import LandingSwitcher from "@/components/LandingSwitcher.astro";
 import { INVITE_ONLY } from "astro:env/server";
+import type { User } from "@/db/schema";
+
+interface Props {
+  user?: User;
+}
+
+const { user } = Astro.props;
+
+const hasInvitation = user?.invitation;
 ---
 
 <div>
@@ -38,7 +47,13 @@ import { INVITE_ONLY } from "astro:env/server";
       </p>
     </div>
 
-    {INVITE_ONLY ? <InviteOnly /> : <LandingSwitcher />}
+    {
+      INVITE_ONLY && !hasInvitation ? (
+        <InviteOnly />
+      ) : (
+        <LandingSwitcher user={user} />
+      )
+    }
 
     <!-- Features Section -->
     <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">

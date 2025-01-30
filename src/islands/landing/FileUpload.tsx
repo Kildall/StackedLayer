@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Upload, Link as LinkIcon, Check } from "lucide-react";
 import { useToast } from "hooks/use-toast";
 import { motion } from "framer-motion";
+import type { User } from "@/db/schema";
+import { PUBLIC_FRONTEND_URL } from "astro:env/client";
 
 interface FileUploadIslandProps {
   maxFileSizeMB: number;
+  user?: User;
   onBack: () => void;
 }
 
@@ -15,6 +18,7 @@ export const FileUploadIsland: FC<FileUploadIslandProps> = ({ maxFileSizeMB, onB
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
   const [shareLink, setShareLink] = useState("");
+  const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const { toast } = useToast();
 
   const MAX_FILE_SIZE = maxFileSizeMB * 1024 * 1024;
@@ -66,25 +70,34 @@ export const FileUploadIsland: FC<FileUploadIslandProps> = ({ maxFileSizeMB, onB
   const handleUpload = async (file: File) => {
     setUploading(true);
     try {
-      // Replace this with your actual upload logic
-      // For example, using the Astro API endpoints
-      // const formData = new FormData();
-      // formData.append('file', file);
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      
-      // Mock upload for demo
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const fileContent = await file.arrayBuffer();
+      const base64File = btoa(
+        new Uint8Array(fileContent).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+      const body = {
+        secret: base64File,
+        type: "file",
+        fileName: file.name,
+        fileMimeType: file.type,
+        fileSize: file.size,
+      }
+      const response = await fetch('/api/secrets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+      });
+      const data: { accessToken: string, expiresAt: string } = await response.json();
       setUploaded(true);
-      setShareLink("https://example.com/files/demo");
+      setExpiryDate(data.expiresAt);
+      setShareLink(`${PUBLIC_FRONTEND_URL}/secrets/${data.accessToken}`);
       toast({
         title: "File uploaded successfully",
         description: "Your file has been uploaded and is ready to share.",
       });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Upload failed",
         description: "There was an error uploading your file. Please try again.",
@@ -173,8 +186,8 @@ export const FileUploadIsland: FC<FileUploadIslandProps> = ({ maxFileSizeMB, onB
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-center gap-2 text-green-500">
-              <Check className="h-6 w-6" />
+            <div className="flex flex-col items-center justify-center gap-2 text-green-500">
+              <Check className="h-12 w-12" />
               <span className="font-medium">File uploaded successfully!</span>
             </div>
             <div className="flex gap-2">
@@ -182,12 +195,17 @@ export const FileUploadIsland: FC<FileUploadIslandProps> = ({ maxFileSizeMB, onB
                 type="text"
                 value={shareLink}
                 readOnly
-                className="flex-1 px-3 py-2 rounded-md bg-muted"
+                className="flex-1 px-3 py-2 rounded-md bg-muted text-sm font-mono text-muted-foreground"
               />
               <Button onClick={copyLink}>
                 <LinkIcon className="h-4 w-4" />
               </Button>
             </div>
+            {expiryDate && (
+              <span className="text-sm text-muted-foreground">
+                This file will be deleted on {new Date(expiryDate).toLocaleDateString()} at {new Date(expiryDate).toLocaleTimeString()}
+              </span>
+            )}
           </motion.div>
         )}
       </Card>

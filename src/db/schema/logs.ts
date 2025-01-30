@@ -1,7 +1,6 @@
 // db/schema/logs.ts
 import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
-import { files } from './files';
 import { secrets } from './secrets';
 import { relations } from 'drizzle-orm';
 
@@ -16,16 +15,11 @@ export const accessLogs = pgTable('accessLog', {
   timezone: text('timezone'),
   language: text('language'),
   userId: text('userId'),
-  fileId: text('fileId').references(() => files.id, { onDelete: 'cascade' }),
   secretId: text('secretId').references(() => secrets.id, { onDelete: 'cascade' }),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
 });
 
 export const accessLogsRelations = relations(accessLogs, ({ one }) => ({
-  file: one(files, {
-    fields: [accessLogs.fileId],
-    references: [files.id],
-  }),
   secret: one(secrets, {
     fields: [accessLogs.secretId],
     references: [secrets.id],

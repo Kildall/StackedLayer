@@ -4,6 +4,7 @@ services:
       context: .
       args:
         - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY}
+        - PUBLIC_FRONTEND_URL=${PUBLIC_FRONTEND_URL}
     ports:
       - "4321:4321"
     env_file:

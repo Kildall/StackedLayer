@@ -5,20 +5,26 @@ import Layout from "@/layouts/Layout.astro";
 import "@/styles/globals.css";
 import { getSession } from "auth-astro/server";
 import { getUser } from "@/db/queries/get-user";
+import type { User } from "@/db/schema";
 
 export const prerender = false;
 
 const session = await getSession(Astro.request);
-const user = session?.user;
+const sessionUser = session?.user;
 
-if (user && user.email) {
-  const userData = await getUser(user.email);
-  if (userData && !userData.invitation) {
+let user: User | undefined;
+
+if (sessionUser && sessionUser.email) {
+  const foundUser = await getUser(sessionUser.email);
+  if (foundUser) {
+    user = foundUser;
+  }
+  if (!foundUser?.invitation) {
     return Astro.redirect("/invite-only");
   }
 }
 ---
 
 <Layout>
-  <Landing />
+  <Landing user={user} />
 </Layout>

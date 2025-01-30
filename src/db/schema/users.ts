@@ -2,7 +2,6 @@ import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
 import { relations } from 'drizzle-orm';
 import { accounts, authenticators, sessions } from './auth';
-import { files } from './files';
 import { secrets } from './secrets';
 import { invitations } from './logs';
 
@@ -26,6 +25,5 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
   authenticators: many(authenticators),
-  files: many(files),
   secrets: many(secrets),
 }));

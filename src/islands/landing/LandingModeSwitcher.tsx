@@ -4,6 +4,7 @@ import { SelectModeIsland } from "@/islands/landing/SelectMode";
 import { FileUploadIsland } from "@/islands/landing/FileUpload";
 import { SecretInputIsland } from "@/islands/landing/SecretInput";
 import { LoginRequiredIsland } from "@/islands/landing/LoginRequired";
+import type { User } from "@/db/schema";
 
 export type LandingModeSelector = "select" | "file" | "secret" | "login";
 
@@ -12,7 +13,7 @@ interface LandingModeSwitcherProps {
   maxFileSizeMB: number;
   maxSecretLength: number;
   loginRequired: boolean;
-  isLoggedIn: boolean;
+  user?: User;
 }
 
 export const LandingModeSwitcherIsland: FC<LandingModeSwitcherProps> = ({
@@ -20,8 +21,9 @@ export const LandingModeSwitcherIsland: FC<LandingModeSwitcherProps> = ({
   maxFileSizeMB,
   maxSecretLength,
   loginRequired,
-  isLoggedIn,
+  user,
 }) => {
+  const isLoggedIn = !!user;
   const [mode, setMode] = useState<LandingModeSelector>(defaultMode);
 
   return (
@@ -53,6 +55,7 @@ export const LandingModeSwitcherIsland: FC<LandingModeSwitcherProps> = ({
           <FileUploadIsland 
             onBack={() => setMode("select")} 
             maxFileSizeMB={maxFileSizeMB} 
+            user={user}
           />
         </motion.div>
       )}
@@ -68,6 +71,7 @@ export const LandingModeSwitcherIsland: FC<LandingModeSwitcherProps> = ({
           <SecretInputIsland 
             onBack={() => setMode("select")} 
             maxSecretLength={maxSecretLength} 
+            user={user}
           />
         </motion.div>
       )}

@@ -3,21 +3,37 @@ import { getInvite } from "@/db/queries/get-invite";
 import { getUser } from "@/db/queries/get-user";
 import { useInvite } from "@/db/queries/use-invite";
 import { withSession } from "@/lib/protected-routes";
+import { inviteCodeSchema } from "@/utils/schemas";
 import type { APIRoute } from "astro";
+import { LOGIN_REQUIRED } from "astro:env/server";
+import { z } from "zod";
 
 export const prerender = false;
 
+const bodySchema = z.object({
+  token: inviteCodeSchema,
+});
+
 export const POST: APIRoute = withSession(async (context) => {
   const { request, auth } = context;
-    try {
+  if (!LOGIN_REQUIRED) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Invitation verification is not allowed",
+      }),
+      { status: 403 }
+    );
+  }
+  try {
     const body = await request.json();
-    const token = body.token;
+    const parsedBody = bodySchema.safeParse(body);
 
-    if (!token) {
+    if (!parsedBody.success) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Token is required",
+          error: "Invalid token",
         }),
         {
           status: 400,
@@ -27,8 +43,11 @@ export const POST: APIRoute = withSession(async (context) => {
         }
       );
     }
+
+    const { token } = parsedBody.data;
+
     const invite = await getInvite(token);
-    if(!invite) {
+    if (!invite) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -43,7 +62,7 @@ export const POST: APIRoute = withSession(async (context) => {
       );
     }
     const email = auth?.user?.email;
-    if(!email) {
+    if (!email) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -58,7 +77,7 @@ export const POST: APIRoute = withSession(async (context) => {
       );
     }
     const user = await getUser(email);
-    if(!user) {
+    if (!user) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -73,7 +92,7 @@ export const POST: APIRoute = withSession(async (context) => {
       );
     }
     const success = await useInvite(token, user.id!);
-    if(!success) {
+    if (!success) {
       return new Response(
         JSON.stringify({
           success: false,

@@ -73,6 +73,21 @@ export default defineConfig({
         access: 'secret',
         default: true,
       }),
+      SECRET_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        default: '',
+      }),
+      KEY_SALT: envField.string({
+        context: 'server',
+        access: 'secret',
+        default: '',
+      }),
+      PUBLIC_FRONTEND_URL: envField.string({
+        context: 'client',
+        access: 'public',
+        default: '',
+      }),
 
 
       AUTH_ENABLED: envField.boolean({

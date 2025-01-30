@@ -1,10 +1,17 @@
 ---
-import { LandingModeSwitcherIsland } from '@/islands/landing/LandingModeSwitcher';
-import { getSession } from 'auth-astro/server';
-import { MAX_FILE_SIZE_MB, MAX_SECRET_LENGTH, LOGIN_REQUIRED } from 'astro:env/server';
+import type { User } from "@/db/schema";
+import { LandingModeSwitcherIsland } from "@/islands/landing/LandingModeSwitcher";
+import {
+  MAX_FILE_SIZE_MB,
+  MAX_SECRET_LENGTH,
+  LOGIN_REQUIRED,
+} from "astro:env/server";
 
-const session = await getSession(Astro.request);
-const isLoggedIn = !!session?.user;
+interface Props {
+  user?: User;
+}
+
+const { user } = Astro.props;
 ---
 
 <LandingModeSwitcherIsland
@@ -12,5 +19,5 @@ const isLoggedIn = !!session?.user;
   maxFileSizeMB={MAX_FILE_SIZE_MB}
   maxSecretLength={MAX_SECRET_LENGTH}
   loginRequired={LOGIN_REQUIRED}
-  isLoggedIn={isLoggedIn}
+  user={user}
 />

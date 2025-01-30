@@ -1,14 +1,17 @@
 import { useState, type FC } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Link as LinkIcon, Check } from "lucide-react";
+import { ArrowLeft, Link as LinkIcon, Check, Clock } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "hooks/use-toast";
 import { motion } from "framer-motion";
+import type { User } from "@/db/schema";
+import { PUBLIC_FRONTEND_URL } from "astro:env/client";
 
 interface SecretInputProps {
   onBack: () => void;
   maxSecretLength: number;
+  user?: User;
 } 
 
 export const SecretInputIsland: FC<SecretInputProps> = ({ onBack, maxSecretLength }) => {
@@ -16,6 +19,7 @@ export const SecretInputIsland: FC<SecretInputProps> = ({ onBack, maxSecretLengt
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [shareLink, setShareLink] = useState("");
+  const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const { toast } = useToast();
 
   const MAX_CHARS = maxSecretLength;
@@ -26,20 +30,15 @@ export const SecretInputIsland: FC<SecretInputProps> = ({ onBack, maxSecretLengt
 
     setSubmitting(true);
     try {
-      // Replace with your actual API endpoint
-      // const response = await fetch('/api/secrets', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ secret })
-      // });
-      // const data = await response.json();
-      
-      // Mock API call for demo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const response = await fetch('/api/secrets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret, type: "secret" })
+      });
+      const data: { accessToken: string, expiresAt: string } = await response.json();
       setSubmitted(true);
-      // Use import.meta.env instead of process.env for Astro
-      setShareLink(`${import.meta.env.PUBLIC_FRONTEND_URL}/secrets/${secret}`);
+      setExpiryDate(data.expiresAt);
+      setShareLink(`${PUBLIC_FRONTEND_URL}/secrets/${data.accessToken}`);
       toast({
         title: "Secret saved successfully",
         description: "Your secret has been saved and is ready to share.",
@@ -122,8 +121,8 @@ export const SecretInputIsland: FC<SecretInputProps> = ({ onBack, maxSecretLengt
           animate={{ opacity: 1, y: 0 }}
           className="space-y-4"
         >
-          <div className="flex items-center justify-center gap-2 text-green-500">
-            <Check className="h-6 w-6" />
+          <div className="flex flex-col items-center justify-center gap-2 text-green-500">
+            <Check className="h-12 w-12" />
             <span className="font-medium">Secret saved successfully!</span>
           </div>
           <div className="flex gap-2">
@@ -131,12 +130,19 @@ export const SecretInputIsland: FC<SecretInputProps> = ({ onBack, maxSecretLengt
               type="text"
               value={shareLink}
               readOnly
-              className="flex-1 px-3 py-2 rounded-md bg-muted"
+              className="flex-1 px-3 py-2 rounded-md bg-muted text-sm font-mono text-muted-foreground"
             />
             <Button onClick={copyLink}>
               <LinkIcon className="h-4 w-4" />
             </Button>
           </div>
+            {expiryDate && (
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground">
+                  This secret will be deleted on {new Date(expiryDate).toLocaleDateString()} at {new Date(expiryDate).toLocaleTimeString()}
+                </span>
+              </div>
+            )}
         </motion.div>
       )}
     </Card>
