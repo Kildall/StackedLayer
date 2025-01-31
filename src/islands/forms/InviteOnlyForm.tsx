@@ -31,7 +31,7 @@ const formSchema = z.object({
 type InviteOnlyFormValues = z.infer<typeof formSchema>;
 
 export function InviteOnlyFormIsland({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
-  const [_, setIsTurnstileVerified] = useState(false);
+  const [cfToken, setCfToken] = useState("");
 
   const form = useForm<InviteOnlyFormValues>({
     resolver: zodResolver(formSchema),
@@ -48,7 +48,7 @@ export function InviteOnlyFormIsland({ className, ...props }: React.ComponentPro
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ token: formData.inviteCode }),
+        body: JSON.stringify({ token: formData.inviteCode, cf: cfToken }),
       });
 
       if (response.status === 404) {
@@ -75,9 +75,9 @@ export function InviteOnlyFormIsland({ className, ...props }: React.ComponentPro
     }
   };
 
-  const handleTurnstileVerify = (isValid: boolean) => {
-    setIsTurnstileVerified(isValid);
-    form.setValue('validVerification', isValid);
+  const handleTurnstileVerify = async (token: string) => {
+    setCfToken(token);
+    form.setValue('validVerification', true);
   };
 
   const handleTurnstileExpired = (expired: boolean) => {
@@ -85,10 +85,10 @@ export function InviteOnlyFormIsland({ className, ...props }: React.ComponentPro
       form.setError('validVerification', {
         message: "Verification expired, please try again",
       });
-      setIsTurnstileVerified(false);
+      form.setValue('validVerification', false);
     } else {
       form.clearErrors('validVerification');
-      setIsTurnstileVerified(true);
+      form.setValue('validVerification', true);
     }
   };
 
@@ -133,7 +133,7 @@ export function InviteOnlyFormIsland({ className, ...props }: React.ComponentPro
                   render={({ field }) => (
                     <div className="flex flex-col justify-center">
                       <TurnstileWidgetIsland
-                        setValidVerification={handleTurnstileVerify}
+                        setToken={handleTurnstileVerify}
                         setExpired={handleTurnstileExpired}
                         {...field}
                       />

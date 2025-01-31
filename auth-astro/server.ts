@@ -23,45 +23,101 @@
  * npm install @auth/core @auth/astro
  * ```
  */
-import { Auth } from '@auth/core'
-import type { AuthAction, Session } from '@auth/core/types'
-import type { APIContext } from 'astro'
-import { parseString } from 'set-cookie-parser'
-import authConfig from 'auth:config'
+import { Auth } from "@auth/core";
+import type { AuthAction, Session } from "@auth/core/types";
+import type { APIContext } from "astro";
+import { parseString } from "set-cookie-parser";
+import authConfig from "auth:config";
 
 const actions: AuthAction[] = [
-	'providers',
-	'session',
-	'csrf',
-	'signin',
-	'signout',
-	'callback',
-	'verify-request',
-	'error',
-]
+  "providers",
+  "session",
+  "csrf",
+  "signin",
+  "signout",
+  "callback",
+  "verify-request",
+  "error",
+];
+
+const EMAIL_PROVIDERS = ["resend"];
+
+const TURNSTILE_VERIFY_URL =
+  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 function AstroAuthHandler(prefix: string, options = authConfig) {
-	return async ({ cookies, request }: APIContext) => {
-		const url = new URL(request.url)
-		const action = url.pathname.slice(prefix.length + 1).split('/')[0] as AuthAction
+  return async ({ cookies, request }: APIContext) => {
+    const url = new URL(request.url);
+    const action = url.pathname
+      .slice(prefix.length + 1)
+      .split("/")[0] as AuthAction;
 
-		if (!actions.includes(action) || !url.pathname.startsWith(prefix + '/')) return
+    const isEmail = EMAIL_PROVIDERS.some((provider) =>
+      url.pathname.includes(provider)
+    );
 
-		const res = await Auth(request, options)
-		if (['callback', 'signin', 'signout'].includes(action)) {
-			// Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
-			const getSetCookie = res.headers.getSetCookie()
-			if (getSetCookie.length > 0) {
-				getSetCookie.forEach((cookie) => {
-					const { name, value, ...options } = parseString(cookie)
-					// Astro's typings are more explicit than @types/set-cookie-parser for sameSite
-					cookies.set(name, value, options as Parameters<(typeof cookies)['set']>[2])
-				})
-				res.headers.delete('Set-Cookie')
-			}
-		}
-		return res
-	}
+    if (action === "signin" && isEmail) {
+      // Extract the cf token from the request form data body
+      const clonedRequest = request.clone();
+      const formData = await clonedRequest.formData();
+      const cf = formData.get("cf");
+
+      if (!cf) {
+        throw new Error(
+          "Cloudflare Turnstile token is required for email signin"
+        );
+      }
+
+      if (cf) {
+        try {
+          const formData = new FormData();
+          formData.append("secret", options.cfSecretKey);
+          formData.append("response", cf);
+
+          const result = await fetch(TURNSTILE_VERIFY_URL, {
+            body: formData,
+            method: "POST",
+          });
+
+          const outcome = await result.json();
+          if (!outcome.success) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: "Invalid token",
+              }),
+              { status: 400 }
+            );
+          }
+        } catch (error) {
+          console.error("Turnstile on email signin failed");
+          throw new Error("Turnstile verification failed");
+        }
+      }
+    }
+
+    if (!actions.includes(action) || !url.pathname.startsWith(prefix + "/"))
+      return;
+
+    const res = await Auth(request, options);
+    if (["callback", "signin", "signout"].includes(action)) {
+      // Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
+      const getSetCookie = res.headers.getSetCookie();
+      if (getSetCookie.length > 0) {
+        getSetCookie.forEach((cookie) => {
+          const { name, value, ...options } = parseString(cookie);
+          // Astro's typings are more explicit than @types/set-cookie-parser for sameSite
+          cookies.set(
+            name,
+            value,
+            options as Parameters<(typeof cookies)["set"]>[2]
+          );
+        });
+        res.headers.delete("Set-Cookie");
+      }
+    }
+    return res;
+  };
 }
 
 /**
@@ -83,23 +139,27 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
  * @returns An object with `GET` and `POST` methods that can be exported in an Astro endpoint.
  */
 export function AstroAuth(options = authConfig) {
-	// @ts-ignore
-	const { AUTH_SECRET, AUTH_TRUST_HOST, VERCEL, NODE_ENV } = import.meta.env
+  // @ts-ignore
+  const { AUTH_SECRET, AUTH_TRUST_HOST, VERCEL, NODE_ENV } = import.meta.env;
 
-	options.secret ??= AUTH_SECRET
-	options.trustHost ??= !!(AUTH_TRUST_HOST ?? VERCEL ?? NODE_ENV !== 'production')
+  options.secret ??= AUTH_SECRET;
+  options.trustHost ??= !!(
+    AUTH_TRUST_HOST ??
+    VERCEL ??
+    NODE_ENV !== "production"
+  );
 
-	const { prefix = '/api/auth', ...authOptions } = options
+  const { prefix = "/api/auth", ...authOptions } = options;
 
-	const handler = AstroAuthHandler(prefix, authOptions)
-	return {
-		async GET(context: APIContext) {
-			return await handler(context)
-		},
-		async POST(context: APIContext) {
-			return await handler(context)
-		},
-	}
+  const handler = AstroAuthHandler(prefix, authOptions);
+  return {
+    async GET(context: APIContext) {
+      return await handler(context);
+    },
+    async POST(context: APIContext) {
+      return await handler(context);
+    },
+  };
 }
 
 /**
@@ -107,18 +167,24 @@ export function AstroAuth(options = authConfig) {
  * @param req The request object.
  * @returns The current session, or `null` if there is no session.
  */
-export async function getSession(req: Request, options = authConfig): Promise<Session | null> {
-	// @ts-ignore
-	options.secret ??= import.meta.env.AUTH_SECRET
-	options.trustHost ??= true
+export async function getSession(
+  req: Request,
+  options = authConfig
+): Promise<Session | null> {
+  // @ts-ignore
+  options.secret ??= import.meta.env.AUTH_SECRET;
+  options.trustHost ??= true;
 
-	const url = new URL(`${options.prefix}/session`, req.url)
-	const response = await Auth(new Request(url, { headers: req.headers }), options)
-	const { status = 200 } = response
+  const url = new URL(`${options.prefix}/session`, req.url);
+  const response = await Auth(
+    new Request(url, { headers: req.headers }),
+    options
+  );
+  const { status = 200 } = response;
 
-	const data = await response.json()
+  const data = await response.json();
 
-	if (!data || !Object.keys(data).length) return null
-	if (status === 200) return data
-	throw new Error(data.message)
+  if (!data || !Object.keys(data).length) return null;
+  if (status === 200) return data;
+  throw new Error(data.message);
 }

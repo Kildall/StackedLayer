@@ -9,6 +9,10 @@ import type { BuiltInProviderType, RedirectableProviderType } from '@auth/core/p
 interface AstroSignInOptions extends SignInOptions {
 	/** The base path for authentication (default: /api/auth) */
 	prefix?: string
+  /**
+   * Cloudflare Turnstile token
+   */
+  cf?: string
 }
 
 interface AstroSignOutParams extends SignOutParams {
@@ -31,12 +35,20 @@ export async function signIn<P extends RedirectableProviderType | undefined = un
 	authorizationParams?: SignInAuthorizationParams
 ) {
 	const { callbackUrl = window.location.href, redirect = true } = options ?? {}
-	const { prefix = '/api/auth', ...opts } = options ?? {}
+	const { prefix = '/api/auth', ...opts } = options ?? {} as Record<string, unknown>
 
 	// TODO: Support custom providers
 	const isCredentials = providerId === 'credentials'
 	const isEmail = providerId === 'email'
 	const isSupportingReturn = isCredentials || isEmail
+
+  if (isEmail && !options?.cf) {
+    throw new Error('Cloudflare Turnstile token is required for email signin')
+  }
+
+  if (isEmail && options?.cf) {
+    opts.cf = options.cf
+  }
 
 	// TODO: Handle custom base path
 	const signInUrl = `${prefix}/${isCredentials ? 'callback' : 'signin'}/${providerId}`
@@ -53,7 +65,6 @@ export async function signIn<P extends RedirectableProviderType | undefined = un
 			'Content-Type': 'application/x-www-form-urlencoded',
 			'X-Auth-Return-Redirect': '1',
 		},
-		// @ts-expect-error -- ignore
 		body: new URLSearchParams({
 			...opts,
 			csrfToken,

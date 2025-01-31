@@ -46,7 +46,7 @@ export function LoginFormIsland({
   inviteOnly,
   ...props
 }: React.ComponentPropsWithoutRef<"div"> & LoginFormProps) {
-  const [_, setIsTurnstileVerified] = useState(false);
+  const [cfToken, setCfToken] = useState("");
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
@@ -66,7 +66,8 @@ export function LoginFormIsland({
 
     await signIn("resend", {
       email: formData.email,
-      callbackUrl: '/'
+      callbackUrl: '/',
+      cf: cfToken,
     });
   };
 
@@ -82,9 +83,9 @@ export function LoginFormIsland({
     });
   };
 
-  const handleTurnstileVerify = (isValid: boolean) => {
-    setIsTurnstileVerified(isValid);
-    form.setValue('validVerification', isValid);
+  const handleTurnstileVerify = async (token: string) => {
+    setCfToken(token);
+    form.setValue('validVerification', true);
   };
 
   const handleTurnstileExpired = (expired: boolean) => {
@@ -92,10 +93,10 @@ export function LoginFormIsland({
       form.setError('validVerification', {
         message: "Verification expired, please try again",
       });
-      setIsTurnstileVerified(false);
+      form.setValue('validVerification', false);
     } else {
       form.clearErrors('validVerification');
-      setIsTurnstileVerified(true);
+      form.setValue('validVerification', true);
     }
   };
 
@@ -168,7 +169,7 @@ export function LoginFormIsland({
                   render={({ field }) => (
                     <div className="flex flex-col justify-center">
                       <TurnstileWidgetIsland
-                        setValidVerification={handleTurnstileVerify}
+                        setToken={handleTurnstileVerify}
                         setExpired={handleTurnstileExpired}
                         {...field}
                       />

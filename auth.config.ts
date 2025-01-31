@@ -10,6 +10,7 @@ import {
   AUTH_GOOGLE_ID,
   AUTH_GOOGLE_SECRET,
   AUTH_RESEND_KEY,
+  TURNSTILE_SECRET_KEY,
 } from "astro:env/server";
 
 export default defineConfig({
@@ -42,4 +43,5 @@ export default defineConfig({
     verifyRequest: AUTH_ENABLED ? "/verify-email" : "/",
     error: AUTH_ENABLED ? "/auth-error" : "/",
   },
+  cfSecretKey: TURNSTILE_SECRET_KEY,
 });

@@ -3,6 +3,7 @@ import { SEO } from "astro-seo";
 import { Toaster } from "@/components/ui/toaster";
 import Footer from "@/components/layout/Footer.astro";
 import Navbar from "@/components/layout/Navbar.astro";
+import TurnstileLoader from "@/islands/components/TurnstileLoader.astro";
 ---
 
 <!doctype html>
@@ -50,6 +51,7 @@ import Navbar from "@/components/layout/Navbar.astro";
       class="min-h-screen flex flex-col bg-gradient-to-br from-background to-muted"
     >
       <Navbar />
+      <TurnstileLoader />
       <main class="flex-grow w-full mx-auto overflow-hidden">
         <slot />
       </main>

@@ -4,6 +4,7 @@ import { getUser } from "@/db/queries/get-user";
 import { useInvite } from "@/db/queries/use-invite";
 import { withSession } from "@/lib/protected-routes";
 import { inviteCodeSchema } from "@/utils/schemas";
+import { verifyTurnstileToken } from "@/utils/turnstile";
 import type { APIRoute } from "astro";
 import { LOGIN_REQUIRED } from "astro:env/server";
 import { z } from "zod";
@@ -12,6 +13,7 @@ export const prerender = false;
 
 const bodySchema = z.object({
   token: inviteCodeSchema,
+  cf: z.string(),
 });
 
 export const POST: APIRoute = withSession(async (context) => {
@@ -44,7 +46,24 @@ export const POST: APIRoute = withSession(async (context) => {
       );
     }
 
-    const { token } = parsedBody.data;
+    const { token, cf } = parsedBody.data;
+
+    const isValid = await verifyTurnstileToken(cf);
+
+    if (!isValid) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid token",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
     const invite = await getInvite(token);
     if (!invite) {

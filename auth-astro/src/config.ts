@@ -35,6 +35,10 @@ export interface AstroAuthConfig {
 	 * Path to the config file
 	 */
 	configFile?: string
+  /**
+   * Cloudflare Turnstile secret key
+   */
+  cfSecretKey?: string
 }
 
 export interface FullAuthConfig extends AstroAuthConfig, Omit<AuthConfig, 'raw'> {}

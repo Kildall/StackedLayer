@@ -1,24 +1,16 @@
 // src/pages/api/verify-token.ts
+import { verifyTurnstileToken } from "@/utils/turnstile";
 import type { APIRoute } from "astro";
-import { TURNSTILE_SECRET_KEY } from "astro:env/server";
+import { z } from "zod";
 
-const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
-
-export const prerender = false;
-
-interface TurnstileVerifyResponse {
-  success: boolean;
-  "error-codes"?: string[];
-  challenge_ts?: string;
-  hostname?: string;
-  action?: string;
-  cdata?: string;
-}
+const tokenSchema = z.object({
+  token: z.string(),
+});
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const token = body.token;
+    const { token } = tokenSchema.parse(body);
 
     if (!token) {
       return new Response(
@@ -35,37 +27,13 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Verify the token with Cloudflare's API
-    const formData = new FormData();
-    formData.append("secret", TURNSTILE_SECRET_KEY);
-    formData.append("response", token);
+    const isValid = await verifyTurnstileToken(token);
 
-    const result = await fetch(TURNSTILE_VERIFY_URL, {
-      body: formData,
-      method: "POST",
-    });
-
-    const outcome: TurnstileVerifyResponse = await result.json();
-
-    if (outcome.success) {
-      return new Response(
-        JSON.stringify({
-          ...outcome,
-          success: true,
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } else {
+    if (!isValid) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Token verification failed",
-          "error-codes": outcome["error-codes"],
+          error: "Invalid token",
         }),
         {
           status: 400,
@@ -75,6 +43,12 @@ export const POST: APIRoute = async ({ request }) => {
         }
       );
     }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+      }),
+    );
   } catch (error) {
     return new Response(
       JSON.stringify({
