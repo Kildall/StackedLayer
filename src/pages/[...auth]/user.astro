@@ -1,0 +1,18 @@
+---
+import { AUTH_ENABLED, INVITE_ONLY } from "astro:env/server";
+import Layout from "@/layouts/Layout.astro";
+
+import "@/styles/globals.css";
+import { protectRoute } from "@/lib/protected-routes";
+
+if (!AUTH_ENABLED || !INVITE_ONLY) {
+  return Astro.redirect("/");
+}
+
+const protectedRouteResult = await protectRoute(Astro.request);
+if (!protectedRouteResult.success) {
+  return Astro.redirect(protectedRouteResult.redirectTo);
+}
+---
+
+<Layout />

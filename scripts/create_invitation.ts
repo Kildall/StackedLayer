@@ -15,5 +15,4 @@ async function createInvitation(email: string) {
 
 export { createInvitation };
 
-const invite = await createInvitation("test@test.com");
-console.log(invite);
+console.log(await createInvitation(process.argv[2]));
