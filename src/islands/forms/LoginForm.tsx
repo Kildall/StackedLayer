@@ -182,7 +182,11 @@ export function LoginFormIsland({
                   type="submit"
                   className="w-full"
                 >
-                  Login with Email
+                  {form.formState.isSubmitting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    "Login with Email"
+                  )}
                 </Button>
               </form>
             </Form>
