@@ -80,11 +80,11 @@ Tried my best to modularize external dependencies, but the current ones are the 
 
 Authentication is optional and can be disabled, however if it's enabled the following providers have been implemented
 
-| Provider           | Description                                                                 |
-|--------------------|-----------------------------------------------------------------------------|
-| Resend             | Email Magic Link ([Docs](https://resend.com/docs/introduction))             |
-| Google             | OAuth 2.0 ([Docs](https://developers.google.com/identity/protocols/oauth2)) |
-
+| Provider           | Description                                                                                              |
+|--------------------|----------------------------------------------------------------------------------------------------------|
+| Resend             | Email Magic Link ([Docs](https://resend.com/docs/introduction))                                          |
+| Google             | OAuth 2.0 ([Docs](https://developers.google.com/identity/protocols/oauth2))                              |
+| Github             | OAuth 2.0 ([Docs](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)) |
 
 ### Enviroment Variables
 
@@ -123,6 +123,10 @@ AUTH_RESEND_KEY=<string>
 # Google Auth
 AUTH_GOOGLE_ID=<string>
 AUTH_GOOGLE_SECRET=<string>
+
+# Github Auth
+AUTH_GITHUB_ID=<string>
+AUTH_GITHUB_SECRET=<string>
 ```
 
 ### Docker
