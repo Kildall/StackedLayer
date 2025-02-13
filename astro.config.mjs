@@ -133,6 +133,17 @@ export default defineConfig({
         access: 'secret',
         default: '',
       }),
+
+      AUTH_GITHUB_ID: envField.string({
+        context: 'server',
+        access: 'secret',
+        default: '',
+      }),
+      AUTH_GITHUB_SECRET: envField.string({
+        context: 'server',
+        access: 'secret',
+        default: '',
+      }),
     }
   }
 });

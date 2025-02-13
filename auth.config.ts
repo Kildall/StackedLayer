@@ -2,6 +2,7 @@ import { defineConfig } from "auth-astro";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Google from "@auth/core/providers/google";
 import Resend from "@auth/core/providers/resend";
+import Github from "@auth/core/providers/github";
 import { db } from "@/db";
 import { users, accounts, sessions, verificationTokens } from "@/db/schema";
 import {
@@ -10,6 +11,8 @@ import {
   AUTH_GOOGLE_ID,
   AUTH_GOOGLE_SECRET,
   AUTH_RESEND_KEY,
+  AUTH_GITHUB_ID,
+  AUTH_GITHUB_SECRET,
   TURNSTILE_SECRET_KEY,
 } from "astro:env/server";
 
@@ -25,6 +28,10 @@ export default defineConfig({
     : undefined,
   providers: AUTH_ENABLED
     ? [
+        Github({
+          clientId: AUTH_GITHUB_ID,
+          clientSecret: AUTH_GITHUB_SECRET,
+        }),
         Google({
           clientId: AUTH_GOOGLE_ID,
           clientSecret: AUTH_GOOGLE_SECRET,
