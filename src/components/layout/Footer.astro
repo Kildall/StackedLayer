@@ -1,22 +1,26 @@
 ---
 // src/components/Footer.astro
 import { Button } from "@/components/ui/button";
-import { Shield, HeartIcon } from "lucide-react";
+import { HeartIcon } from "lucide-react";
+import Logo from "@/assets/logo.svg";
+import { Image } from "astro:assets";
 
 const currentYear = new Date().getFullYear();
 
 // Define navigation links
 const pages = [
   { href: "/", label: "Home" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/signup", label: "Sign Up" },
+  { href: "/#faqs", label: "FAQs" },
+  { href: "/#features", label: "Features" },
 ];
 
-const socials = [{ href: "https://github.com/kildall", label: "Github" }];
+const socials = [
+  { href: "https://github.com/kildall/stackedlayer", label: "Github" },
+];
 
 const legal = [
   { href: "/privacy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms and Conditions" },
+  { href: "/terms", label: "Terms of Service" },
 ];
 ---
 
@@ -25,8 +29,14 @@ const legal = [
     <div class="flex flex-col md:flex-row justify-around">
       <div class="mb-8 md:mb-0">
         <a href="/" class="flex items-center gap-2">
-          <Shield className="icon-class w-8" />
-          <h2 class="text-lg font-bold">StackedLayer</h2>
+          <Image
+            src={Logo}
+            alt="StackedLayer"
+            width={48}
+            height={48}
+            class="w-12 h-12 aspect-square min-h-[24px]"
+          />
+          <h2 class="text-xl font-bold">StackedLayer</h2>
         </a>
         <div class="mt-4">
           <Button variant="secondary">

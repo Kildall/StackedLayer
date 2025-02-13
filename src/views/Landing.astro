@@ -1,6 +1,6 @@
 ---
 import { Waves } from "@/components/ui/waves-background";
-import { Shield, Lock } from "lucide-react";
+import { Shield, Lock, GitPullRequestDraft } from "lucide-react";
 import InviteOnly from "@/components/InviteOnly.astro";
 import LandingSwitcher from "@/components/LandingSwitcher.astro";
 import { INVITE_ONLY } from "astro:env/server";
@@ -56,7 +56,10 @@ const hasInvitation = user?.invitation;
     }
 
     <!-- Features Section -->
-    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+    <div
+      id="features"
+      class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center"
+    >
       <div class="p-6">
         <Shield className="h-12 w-12 mx-auto text-primary mb-4" />
         <h3 class="text-lg font-semibold mb-2">End-to-End Encryption</h3>
@@ -72,7 +75,7 @@ const hasInvitation = user?.invitation;
         </p>
       </div>
       <div class="p-6">
-        <Shield className="h-12 w-12 mx-auto text-primary mb-4" />
+        <GitPullRequestDraft className="h-12 w-12 mx-auto text-primary mb-4" />
         <h3 class="text-lg font-semibold mb-2">Open Source</h3>
         <p class="text-muted-foreground">
           Fully transparent, auditable code you can trust

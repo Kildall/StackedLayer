@@ -1,26 +1,26 @@
 ---
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, LogIn, UserPlus } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { MobileNavbar } from "@/islands/layout/MobileNavbar";
 import { getSession } from "auth-astro/server";
 import { UserProfileIsland } from "@/islands/layout/UserProfile";
 import { AUTH_ENABLED } from "astro:env/server";
+import Logo from "@/assets/logo.svg";
+import { Image } from "astro:assets";
+
 import Github from "simple-icons-astro/Github";
 
 const currentPath = Astro.url.pathname;
 
 const shouldShow = {
-  login: AUTH_ENABLED && currentPath !== "/login",
-  signup: AUTH_ENABLED && currentPath !== "/login",
-  github: !AUTH_ENABLED,
+  signin: AUTH_ENABLED && currentPath !== "/login",
   user: false,
 };
 
 const session = AUTH_ENABLED ? await getSession(Astro.request) : null;
 if (session?.user) {
-  shouldShow.login = false;
-  shouldShow.signup = false;
+  shouldShow.signin = false;
   shouldShow.user = true;
 }
 ---
@@ -32,7 +32,13 @@ if (session?.user) {
     <ul class="hidden md:flex items-center gap-10 text-card-foreground">
       <li class="text-primary font-medium">
         <a href="/" class="flex items-center gap-2">
-          <Shield className="w-6 h-6" client:load />
+          <Image
+            src={Logo}
+            alt="StackedLayer"
+            width={36}
+            height={36}
+            class="w-8 h-8 aspect-square min-h-[24px]"
+          />
           <h1 class="text-xl font-bold">StackedLayer</h1>
         </a>
       </li>
@@ -44,30 +50,26 @@ if (session?.user) {
       </li>
     </ul>
 
-    <div class="flex items-center">
-      {
-        shouldShow.login && (
-          <a href="/login">
-            <Button
-              variant="outline"
-              className="hidden px-2 md:flex items-center gap-2"
-            >
-              <LogIn className="w-4 h-4" client:load />
-              Log In
-            </Button>
-          </a>
-        )
-      }
+    <div class="flex items-center gap-2">
+      <a href="https://www.github.com/kildall/stackedlayer" target="_blank">
+        <Button
+          variant="ghost"
+          className="hidden md:flex items-center gap-2 mx-2"
+        >
+          <Github className="w-4 h-4" />
+          GitHub
+        </Button>
+      </a>
 
       {
-        shouldShow.signup && (
-          <a href="/login">
+        shouldShow.signin && (
+          <a href="/login" class="w-32">
             <Button
-              variant="default"
-              className="hidden px-2 md:flex items-center gap-2 ml-2 mr-2"
+              variant="outline"
+              className="hidden px-2 md:flex items-center gap-2 w-full"
             >
-              <UserPlus className="w-4 h-4" client:load />
-              Sign Up
+              <LogIn className="w-4 h-4" client:load />
+              Sign In
             </Button>
           </a>
         )
@@ -76,17 +78,6 @@ if (session?.user) {
       {
         shouldShow.user && (
           <UserProfileIsland client:visible session={JSON.stringify(session)} />
-        )
-      }
-
-      {
-        shouldShow.github && (
-          <a href="https://github.com/kildall">
-            <Button variant="outline">
-              <Github className="w-4 h-4" />
-              GitHub
-            </Button>
-          </a>
         )
       }
 
