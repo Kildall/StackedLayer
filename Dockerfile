@@ -2,9 +2,6 @@ FROM node:lts-alpine AS base
 WORKDIR /app
 RUN npm install -g pnpm
 
-
-
-
 FROM base AS builder
 COPY . .
 RUN pnpm install --ignore-scripts
