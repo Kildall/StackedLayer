@@ -3,16 +3,17 @@
  * @param buffer - The array buffer to convert
  * @returns The base64 string
  */
-function arrayBufferToBase64(buffer: number[] | Uint8Array): string {
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
   const chunks: string[] = [];
-  const chunkSize = 8192; // Process in chunks to avoid call stack issues
-  const array = Array.isArray(buffer) ? buffer : Array.from(buffer);
-  
-  for (let i = 0; i < array.length; i += chunkSize) {
-    const chunk = array.slice(i, i + chunkSize);
-    chunks.push(String.fromCharCode.apply(null, chunk));
+  const chunkSize = 0xffff; // Max string length in JS
+
+  // Process the data in chunks to avoid string size limitations
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.slice(i, i + chunkSize);
+    chunks.push(String.fromCharCode.apply(null, chunk as unknown as number[]));
   }
-  
+
   return btoa(chunks.join(''));
 }
 

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import type { FC } from "react";
 
 // Define the mode type
-export type LandingModeSelector = "select" | "file" | "secret" | "login";
+export type LandingModeSelector = "select" | "file" | "text" | "login";
 
 interface SelectModeProps {
   setMode: (mode: LandingModeSelector) => void;
@@ -44,7 +44,7 @@ export const SelectModeIsland: FC<SelectModeProps> = ({
           variant="outline"
           size="lg"
           className="h-32 flex flex-col items-center justify-center gap-2 hover:bg-accent hover:text-accent-foreground transition-colors"
-          onClick={() => handleSetMode("secret")}
+          onClick={() => handleSetMode("text")}
         >
           <Lock className="h-8 w-8" />
           <span>Type Secret</span>

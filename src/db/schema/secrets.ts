@@ -7,11 +7,9 @@ import { accessLogs } from './logs';
 
 export const secrets = pgTable('secret', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
-  key: text('key').notNull(),
   type: text('type').notNull(),
   encryptedData: text('encryptedData').notNull(),
   isViewed: boolean('isViewed').default(false),
-  accessToken: text('accessToken').unique().notNull(),
   expiresAt: timestamp('expiresAt').notNull(),
   userId: text('userId').references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('createdAt').defaultNow().notNull(),

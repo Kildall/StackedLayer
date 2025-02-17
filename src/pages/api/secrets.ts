@@ -4,37 +4,26 @@ import type { APIRoute } from "astro";
 import { MAX_SECRET_LENGTH, MAX_FILE_SIZE_MB } from "astro:env/server";
 import { z } from "zod";
 import { getSecret } from "@/db/queries/get-secret";
-
-const bodySchema = z.object({
-  secret: z.string(),
-  type: z.enum(["secret", "file"]),
-  fileName: z.string().optional(),
-  fileMimeType: z.string().optional(),
-  fileSize: z.number().optional(),
-});
+import { createSecretSchema } from "@/schemas/api/create-secret";
+import { getSecretQuerySchema } from "@/schemas/api/get-secret";
 
 export const POST: APIRoute = withAuth(async (context) => {
   try {
     const { request, user } = context;
     const body = await request.json();
 
-    const parsedBody = bodySchema.safeParse(body);
+    const parsedBody = createSecretSchema.safeParse(body);
     if (!parsedBody.success) {
+      console.log("Invalid secret", parsedBody.error);
       return new Response(JSON.stringify({ error: "Invalid secret" }), {
         status: 400,
       });
     }
 
-    const { secret, type, fileName, fileMimeType, fileSize } = parsedBody.data;
+    const { secret, type } = parsedBody.data;
 
     // Validate file data
     if (type === "file") {
-      if (!fileName || !fileMimeType || !fileSize) {
-        return new Response(JSON.stringify({ error: "Invalid file data" }), {
-          status: 400,
-        });
-      }
-
       // Secret is the file content in base64
       const fileContent = Buffer.from(secret, "base64");
       if (fileContent.length > MAX_FILE_SIZE_MB * 1024 * 1024) {
@@ -45,7 +34,7 @@ export const POST: APIRoute = withAuth(async (context) => {
     }
 
     // Validate secret data
-    if (type === "secret") {
+    if (type === "text") {
       if (secret.length > MAX_SECRET_LENGTH) {
         return new Response(JSON.stringify({ error: "Secret too long" }), {
           status: 400,
@@ -53,29 +42,27 @@ export const POST: APIRoute = withAuth(async (context) => {
       }
     }
 
+    const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+    const userAgent = request.headers.get("User-Agent") ?? "unknown";
+
     // Create the secret
     if (type === "file") {
-      const fileContent = new Uint8Array(Buffer.from(secret, "base64"));
-      const dbSecret = await createSecret(fileContent, {
+      const dbSecret = await createSecret(secret, {
         email: user?.email,
         type,
-        fileName,
-        fileMimeType,
-        fileSize,
         request: {
-          ip: request.headers.get("x-forwarded-for") ?? "unknown",
-          userAgent: request.headers.get("User-Agent") ?? "unknown",
+          ip,
+          userAgent,
         },
       });
       return new Response(JSON.stringify({ ...dbSecret }), { status: 200 });
-    } else if (type === "secret") {
-      const secretBytes = new TextEncoder().encode(secret);
-      const dbSecret = await createSecret(secretBytes, {
+    } else if (type === "text") {
+      const dbSecret = await createSecret(secret, {
         email: user?.email,
         type,
         request: {
-          ip: request.headers.get("x-forwarded-for") ?? "unknown",
-          userAgent: request.headers.get("User-Agent") ?? "unknown",
+          ip,
+          userAgent,
         },
       });
       return new Response(JSON.stringify({ ...dbSecret }), { status: 200 });
@@ -92,25 +79,22 @@ export const POST: APIRoute = withAuth(async (context) => {
   }
 });
 
-const querySchema = z.object({
-  secret: z.string(),
-});
 
 export const GET: APIRoute = withSession(async (context) => {
   const { request, auth, url } = context;
 
   try {
     const paramSecret = url.searchParams.get("secret");
-    const parsedQuery = querySchema.safeParse({ secret: paramSecret });
+    const parsedQuery = getSecretQuerySchema.safeParse({ secret: paramSecret });
     if (!parsedQuery.success) {
       return new Response(JSON.stringify({ error: "Invalid secret" }), {
         status: 400,
       });
     }
 
-    const { secret: keySignature } = parsedQuery.data;
+    const { secret: secretId } = parsedQuery.data;
 
-    if (!keySignature) {
+    if (!secretId) {
       return new Response(JSON.stringify({ error: "Secret not found" }), {
         status: 404,
       });
@@ -122,11 +106,14 @@ export const GET: APIRoute = withSession(async (context) => {
       userId = user.id;
     }
 
-    const secret = await getSecret(keySignature, {
+    const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+    const userAgent = request.headers.get("User-Agent") ?? "unknown";
+
+    const secret = await getSecret(secretId, {
       userId,
       request: {
-        ip: request.headers.get("x-forwarded-for") ?? "unknown",
-        userAgent: request.headers.get("User-Agent") ?? "unknown",
+        ip,
+        userAgent,
       },
     });
 

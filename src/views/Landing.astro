@@ -1,5 +1,4 @@
 ---
-import { Waves } from "@/components/ui/waves-background";
 import { Shield, Lock, GitPullRequestDraft } from "lucide-react";
 import InviteOnly from "@/components/InviteOnly.astro";
 import LandingSwitcher from "@/components/LandingSwitcher.astro";
@@ -15,25 +14,7 @@ const { user } = Astro.props;
 const hasInvitation = user?.invitation;
 ---
 
-<div>
-  <!-- Background Waves -->
-  <div class="absolute inset-0 h-screen">
-    <Waves
-      client:visible
-      lineColor="rgba(0, 0, 0, 0.3)"
-      backgroundColor="transparent"
-      waveSpeedX={0.02}
-      waveSpeedY={0.01}
-      waveAmpX={40}
-      waveAmpY={20}
-      friction={0.9}
-      tension={0.01}
-      maxCursorMove={120}
-      xGap={12}
-      yGap={36}
-    />
-  </div>
-
+<div class="relative">
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Hero Section -->
     <div class="text-center my-12">

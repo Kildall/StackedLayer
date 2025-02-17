@@ -1,24 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, EyeOff, File, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
-
-interface SecretIslandProps {
-  secret: string;
-  oneTime: boolean;
-}
-
-interface SecretResponse {
-  type: "text" | "file";
-  content: string;
-  expiresAt: string;
-  fileData?: {
-    fileName: string;
-    fileMimeType: string;
-    fileSize: number;
-  };
-}
+import { Input } from '@/components/ui/input';
+import { Download, Eye, EyeOff, File, Lock, AlertCircle, ArrowLeft, Key } from 'lucide-react';
+import { fetchAndDecryptSecret } from './ViewSecret';
+import type { DecryptedSecret } from '@/types/islands/secrets/view-secret';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return bytes + ' B';
@@ -35,29 +26,108 @@ const fadeInOut = {
   transition: { duration: 0.2 }
 };
 
+interface SecretIslandProps {
+  secret: string;
+  oneTime: boolean;
+}
+
+const decryptionKeySchema = z.object({
+  decryptionKey: z.string().min(1, { message: "Decryption key is required" }).max(512, { message: "Decryption key must be less than 512 characters" }),
+});
+
+const DecryptionKeyForm = ({ onSubmit }: { onSubmit: (key: string) => void }) => {
+  const form = useForm<z.infer<typeof decryptionKeySchema>>({
+    resolver: zodResolver(decryptionKeySchema),
+    defaultValues: {
+      decryptionKey: '',
+    },
+  });
+
+  const handleSubmit = (data: z.infer<typeof decryptionKeySchema>) => {
+    onSubmit(data.decryptionKey);
+  };
+
+  return (
+    <motion.div
+      {...fadeInOut}
+      className="flex flex-col items-center space-y-4"
+    >
+      <div className="h-12 w-12 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+        <Key className="h-6 w-6" />
+      </div>
+
+      <div className="text-center space-y-2">
+        <h3 className="font-semibold text-lg">Enter Decryption Key</h3>
+        <p className="text-sm text-primary-foreground/80">
+          This secret requires a decryption key to be viewed
+        </p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <div className="space-y-4 w-full max-w-sm">
+            <FormField
+              name="decryptionKey"
+              render={({ field }) => (
+                <Input
+                  type="text"
+                  placeholder="Paste your decryption key"
+                  className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
+                  {...field}
+                />
+              )}
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              className="w-full"
+              disabled={form.formState.isSubmitting || !form.formState.isValid}
+            >
+              Decrypt Secret
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </motion.div>
+  );
+};
+
 export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) => {
-  const [secretData, setSecretData] = useState<SecretResponse | null>(null);
+  const [secretData, setSecretData] = useState<DecryptedSecret | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [decryptionKey, setDecryptionKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const id = url.pathname.split('/').pop() ?? "";
+    const key = url.hash.slice(1) ?? "";
+
+    if (!id) {
+      setError("Invalid Secret URL");
+      return;
+    }
+
+    if (key) {
+      setDecryptionKey(key);
+    } else {
+      setIsLoading(false);
+      return;
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchSecret() {
+      if (!decryptionKey) return;
+      const url = new URL(window.location.href);
+      const id = url.pathname.split('/').pop() ?? "";
+
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch(`/api/secrets?secret=${secret}`);
-        if (!response.ok) {
-          if (response.headers.get("Content-Type") === "application/json") {
-            const data = await response.json();
-            setError(data.error);
-          } else {
-            setError("An error occurred");
-          }
-        } else {
-          const data = await response.json();
-          setSecretData(data);
-        }
+        const data = await fetchAndDecryptSecret(id, decryptionKey);
+        setSecretData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -65,21 +135,31 @@ export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) =
       }
     }
     fetchSecret();
-  }, [secret]);
+  }, [decryptionKey]);
 
   const handleDownload = () => {
     if (!secretData?.fileData) return;
+    const blob = new Blob([secretData.content], { 
+      type: secretData.fileData.fileMimeType 
+    });
     
-    const blob = new Blob([secretData.content], { type: secretData.fileData.fileMimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = secretData.fileData.fileName;
+    
+    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  const handleKeySubmit = (key: string) => {
+    setDecryptionKey(key);
+  };
+
+  console.log(secretData);
 
   return (
     <div className="h-full flex">
@@ -96,8 +176,8 @@ export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) =
                 <div className="space-y-2 flex-1">
                   <h3 className="font-semibold text-lg">Unable to Load Secret</h3>
                   <p className="text-sm text-muted-foreground">{error}</p>
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     className="mt-4"
                     onClick={() => window.location.replace("/")}
                   >
@@ -128,6 +208,8 @@ export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) =
                 </div>
                 <p className="text-primary-foreground text-sm font-medium">Decrypting Secret...</p>
               </motion.div>
+            ) : !decryptionKey ? (
+              <DecryptionKeyForm onSubmit={handleKeySubmit} />
             ) : secretData ? (
               <motion.div
                 key="content"
@@ -153,8 +235,8 @@ export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) =
                       transition={{ duration: 0.3, delay: 0.3 }}
                       className="font-medium"
                     >
-                      {secretData.type === 'file' 
-                        ? secretData.fileData?.fileName 
+                      {secretData.type === 'file'
+                        ? secretData.fileData?.fileName
                         : 'Encrypted Message'}
                     </motion.span>
                   </div>
@@ -190,7 +272,7 @@ export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) =
                         {secretData.type === 'text' ? (
                           <div className="p-4 bg-muted rounded-md">
                             <pre className="whitespace-pre-wrap break-words font-mono text-sm text-muted-foreground">
-                              {secretData.content}
+                              {new TextDecoder().decode(secretData.content)}
                             </pre>
                           </div>
                         ) : (
@@ -198,7 +280,7 @@ export const SecretIsland: React.FC<SecretIslandProps> = ({ secret, oneTime }) =
                             <div className="text-sm text-primary-foreground">
                               Size: {formatFileSize(secretData.fileData?.fileSize || 0)}
                             </div>
-                            <Button 
+                            <Button
                               onClick={handleDownload}
                               className="w-full"
                               variant="secondary"

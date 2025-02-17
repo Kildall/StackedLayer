@@ -1,12 +1,12 @@
 import { useState, type FC } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SelectModeIsland } from "@/islands/landing/SelectMode";
-import { FileUploadIsland } from "@/islands/landing/FileUpload";
-import { SecretInputIsland } from "@/islands/landing/SecretInput";
+import { FileUploadIsland } from "@/islands/landing/file-upload/FileUpload";
 import { LoginRequiredIsland } from "@/islands/landing/LoginRequired";
 import type { User } from "@/db/schema";
+import { SecretInputIsland } from "@/islands/landing/secret-input/SecretInput";
 
-export type LandingModeSelector = "select" | "file" | "secret" | "login";
+export type LandingModeSelector = "select" | "file" | "text" | "login";
 
 interface LandingModeSwitcherProps {
   defaultMode?: LandingModeSelector;
@@ -60,9 +60,9 @@ export const LandingModeSwitcherIsland: FC<LandingModeSwitcherProps> = ({
         </motion.div>
       )}
 
-      {mode === "secret" && (
+      {mode === "text" && (
         <motion.div
-          key="secret"
+          key="text"
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -100 }}
@@ -71,7 +71,6 @@ export const LandingModeSwitcherIsland: FC<LandingModeSwitcherProps> = ({
           <SecretInputIsland 
             onBack={() => setMode("select")} 
             maxSecretLength={maxSecretLength} 
-            user={user}
           />
         </motion.div>
       )}
