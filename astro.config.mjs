@@ -5,6 +5,7 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 import auth from 'auth-astro'
 import node from '@astrojs/node';
+import robotsTxt from 'astro-robots-txt';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,6 +15,8 @@ export default defineConfig({
     applyBaseStyles: false,
   }), sitemap(), auth({
     injectEndpoints: true,
+  }), robotsTxt({
+    sitemap: 'https://stackedlayer.com/sitemap.xml',
   })],
   srcDir: './src',
   adapter: node({

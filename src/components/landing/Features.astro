@@ -1,0 +1,30 @@
+---
+import { Shield, Lock, GitPullRequestDraft } from "lucide-react";
+---
+
+<div
+  id="features"
+  class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center"
+>
+  <div class="p-6">
+    <Shield className="h-12 w-12 mx-auto text-primary mb-4" />
+    <h3 class="text-lg font-semibold mb-2">End-to-End Encryption</h3>
+    <p class="text-muted-foreground">
+      Your data is encrypted before it leaves your browser
+    </p>
+  </div>
+  <div class="p-6">
+    <Lock className="h-12 w-12 mx-auto text-primary mb-4" />
+    <h3 class="text-lg font-semibold mb-2">One-Time Access</h3>
+    <p class="text-muted-foreground">
+      Files and secrets are deleted immediately after being viewed
+    </p>
+  </div>
+  <div class="p-6">
+    <GitPullRequestDraft className="h-12 w-12 mx-auto text-primary mb-4" />
+    <h3 class="text-lg font-semibold mb-2">Open Source</h3>
+    <p class="text-muted-foreground">
+      Fully transparent, auditable code you can trust
+    </p>
+  </div>
+</div>

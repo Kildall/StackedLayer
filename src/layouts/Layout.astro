@@ -5,24 +5,49 @@ import Footer from "@/components/layout/Footer.astro";
 import Navbar from "@/components/layout/Navbar.astro";
 import TurnstileLoader from "@/islands/components/TurnstileLoader.astro";
 import { Waves } from "@/components/ui/waves-background";
+
+interface Props {
+  enableWaves?: boolean;
+}
+interface Props {
+  title?: string;
+  defaultTitle?: string;
+  description?: string;
+  image?: string;
+  article?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    tags?: string[];
+  };
+  enableWaves?: boolean;
+}
+
+// Destructure props with defaults
+const {
+  title,
+  defaultTitle = "StackedLayer",
+  description = "Security focused open source One-Time files and secrets sharing. Your data is automatically deleted after being viewed, ensuring your sensitive information stays private and secure.",
+  image = "/favicon.svg",
+  article,
+  enableWaves = true,
+} = Astro.props;
+
+const formattedTitle = title ? `${title} | ${defaultTitle}` : defaultTitle;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <SEO
-      titleDefault="StackedLayer"
-      titleTemplate="%s | StackedLayer"
-      description="Security focused open source One-Time files and secrets sharing. Your data is automatically deleted after being viewed, ensuring your sensitive information stays private and secure."
+      title={formattedTitle}
+      description={description}
       openGraph={{
         basic: {
-          title: "StackedLayer",
+          title: formattedTitle,
           type: "website",
-          image: "/favicon.svg",
+          image,
         },
-      }}
-      twitter={{
-        creator: "@StackedLayer",
       }}
       charset="utf-8"
       extend={{
@@ -52,22 +77,26 @@ import { Waves } from "@/components/ui/waves-background";
     <div
       class="relative min-h-screen flex flex-col bg-gradient-to-br from-background to-muted"
     >
-      <div class="absolute inset-0 h-full">
-        <Waves
-          client:visible
-          lineColor="rgba(0, 0, 0, 0.3)"
-          backgroundColor="transparent"
-          waveSpeedX={0.02}
-          waveSpeedY={0.01}
-          waveAmpX={40}
-          waveAmpY={20}
-          friction={0.9}
-          tension={0.01}
-          maxCursorMove={120}
-          xGap={12}
-          yGap={36}
-        />
-      </div>
+      {
+        enableWaves && (
+          <div class="absolute inset-0 h-full">
+            <Waves
+              client:visible
+              lineColor="rgba(0, 0, 0, 0.3)"
+              backgroundColor="transparent"
+              waveSpeedX={0.02}
+              waveSpeedY={0.01}
+              waveAmpX={40}
+              waveAmpY={20}
+              friction={0.9}
+              tension={0.01}
+              maxCursorMove={120}
+              xGap={12}
+              yGap={36}
+            />
+          </div>
+        )
+      }
       <Navbar />
       <TurnstileLoader />
       <main class="flex-grow w-full mx-auto overflow-hidden">
