@@ -36,7 +36,6 @@
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "astro": "^5.1.8",
-    "astro-robots-txt": "^1.0.0",
     "astro-seo": "^0.8.4",
     "auth-astro": "file:./auth-astro",
     "bcryptjs": "^2.4.3",
