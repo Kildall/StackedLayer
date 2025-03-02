@@ -6,6 +6,7 @@ import "@/styles/globals.css";
 import { getSession } from "auth-astro/server";
 import { getUser } from "@/db/queries/get-user";
 import type { User } from "@/db/schema";
+import { INVITE_ONLY } from "astro:env/server";
 
 export const prerender = false;
 
@@ -19,7 +20,7 @@ if (sessionUser && sessionUser.email) {
   if (foundUser) {
     user = foundUser;
   }
-  if (!foundUser?.invitation) {
+  if (INVITE_ONLY && !foundUser?.invitation) {
     return Astro.redirect("/invite-only");
   }
 }
